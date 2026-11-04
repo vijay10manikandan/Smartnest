@@ -13,8 +13,8 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Smartnest.settings')
 django.setup()
 from django.contrib.auth.models import User
 
-username = 'YOUR_NEW_USERNAME'
-password = 'YOUR_NEW_PASSWORD'
+username = 'vijay'
+password = 'Mvijay212021'
 
 u, created = User.objects.get_or_create(username=username)
 u.set_password(password)
