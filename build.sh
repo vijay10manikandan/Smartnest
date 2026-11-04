@@ -5,6 +5,9 @@ pip install -r requirements.txt
 python manage.py collectstatic --no-input 
 python manage.py migrate
 
+if [ -f datadump.json ]; then
+    python manage.py loaddata datadump.json
+fi
 # Create or reset your superuser credentials automatically
 python -c "
 import os

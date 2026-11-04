@@ -1,0 +1,3318 @@
+[
+{
+  "model": "Smartnestapp.building",
+  "pk": 1,
+  "fields": {
+    "name": "Building-1",
+    "address": "Main Complex"
+  }
+},
+{
+  "model": "Smartnestapp.building",
+  "pk": 2,
+  "fields": {
+    "name": "Building-2",
+    "address": "Annex Complex"
+  }
+},
+{
+  "model": "Smartnestapp.room",
+  "pk": 1,
+  "fields": {
+    "building": 1,
+    "room_number": "A1",
+    "floor": "Ground Floor",
+    "monthly_rent": "6500.00",
+    "target_advance_amount": "10000.00",
+    "is_vacant": false,
+    "maintenance_type": "PER_ROOM",
+    "maintenance_charges": "0.00",
+    "maintenance_rate_per_member": "250.00"
+  }
+},
+{
+  "model": "Smartnestapp.room",
+  "pk": 2,
+  "fields": {
+    "building": 1,
+    "room_number": "A2",
+    "floor": "Ground Floor",
+    "monthly_rent": "5500.00",
+    "target_advance_amount": "10000.00",
+    "is_vacant": false,
+    "maintenance_type": "PER_ROOM",
+    "maintenance_charges": "0.00",
+    "maintenance_rate_per_member": "250.00"
+  }
+},
+{
+  "model": "Smartnestapp.room",
+  "pk": 3,
+  "fields": {
+    "building": 1,
+    "room_number": "A3",
+    "floor": "Ground Floor",
+    "monthly_rent": "5000.00",
+    "target_advance_amount": "10000.00",
+    "is_vacant": false,
+    "maintenance_type": "PER_ROOM",
+    "maintenance_charges": "500.00",
+    "maintenance_rate_per_member": "250.00"
+  }
+},
+{
+  "model": "Smartnestapp.room",
+  "pk": 4,
+  "fields": {
+    "building": 1,
+    "room_number": "A4",
+    "floor": "Ground Floor",
+    "monthly_rent": "5500.00",
+    "target_advance_amount": "10000.00",
+    "is_vacant": false,
+    "maintenance_type": "PER_ROOM",
+    "maintenance_charges": "500.00",
+    "maintenance_rate_per_member": "250.00"
+  }
+},
+{
+  "model": "Smartnestapp.room",
+  "pk": 5,
+  "fields": {
+    "building": 1,
+    "room_number": "A5",
+    "floor": "Ground Floor",
+    "monthly_rent": "5000.00",
+    "target_advance_amount": "10000.00",
+    "is_vacant": false,
+    "maintenance_type": "PER_ROOM",
+    "maintenance_charges": "0.00",
+    "maintenance_rate_per_member": "250.00"
+  }
+},
+{
+  "model": "Smartnestapp.room",
+  "pk": 6,
+  "fields": {
+    "building": 1,
+    "room_number": "A6",
+    "floor": "Ground Floor",
+    "monthly_rent": "5000.00",
+    "target_advance_amount": "10000.00",
+    "is_vacant": false,
+    "maintenance_type": "PER_ROOM",
+    "maintenance_charges": "0.00",
+    "maintenance_rate_per_member": "250.00"
+  }
+},
+{
+  "model": "Smartnestapp.room",
+  "pk": 7,
+  "fields": {
+    "building": 1,
+    "room_number": "A7",
+    "floor": "Ground Floor",
+    "monthly_rent": "5000.00",
+    "target_advance_amount": "10000.00",
+    "is_vacant": false,
+    "maintenance_type": "PER_ROOM",
+    "maintenance_charges": "0.00",
+    "maintenance_rate_per_member": "250.00"
+  }
+},
+{
+  "model": "Smartnestapp.room",
+  "pk": 8,
+  "fields": {
+    "building": 1,
+    "room_number": "A8",
+    "floor": "Ground Floor",
+    "monthly_rent": "5500.00",
+    "target_advance_amount": "15000.00",
+    "is_vacant": false,
+    "maintenance_type": "PER_ROOM",
+    "maintenance_charges": "0.00",
+    "maintenance_rate_per_member": "250.00"
+  }
+},
+{
+  "model": "Smartnestapp.room",
+  "pk": 9,
+  "fields": {
+    "building": 1,
+    "room_number": "A9",
+    "floor": "Ground Floor",
+    "monthly_rent": "5500.00",
+    "target_advance_amount": "15000.00",
+    "is_vacant": false,
+    "maintenance_type": "PER_ROOM",
+    "maintenance_charges": "500.00",
+    "maintenance_rate_per_member": "250.00"
+  }
+},
+{
+  "model": "Smartnestapp.room",
+  "pk": 10,
+  "fields": {
+    "building": 1,
+    "room_number": "A10",
+    "floor": "Ground Floor",
+    "monthly_rent": "5000.00",
+    "target_advance_amount": "10000.00",
+    "is_vacant": false,
+    "maintenance_type": "PER_ROOM",
+    "maintenance_charges": "0.00",
+    "maintenance_rate_per_member": "250.00"
+  }
+},
+{
+  "model": "Smartnestapp.room",
+  "pk": 11,
+  "fields": {
+    "building": 1,
+    "room_number": "B1",
+    "floor": "First Floor",
+    "monthly_rent": "5000.00",
+    "target_advance_amount": "15000.00",
+    "is_vacant": false,
+    "maintenance_type": "PER_MEMBER",
+    "maintenance_charges": "500.00",
+    "maintenance_rate_per_member": "250.00"
+  }
+},
+{
+  "model": "Smartnestapp.room",
+  "pk": 12,
+  "fields": {
+    "building": 1,
+    "room_number": "B2",
+    "floor": "First Floor",
+    "monthly_rent": "11250.00",
+    "target_advance_amount": "20000.00",
+    "is_vacant": false,
+    "maintenance_type": "PER_ROOM",
+    "maintenance_charges": "0.00",
+    "maintenance_rate_per_member": "2250.00"
+  }
+},
+{
+  "model": "Smartnestapp.room",
+  "pk": 13,
+  "fields": {
+    "building": 1,
+    "room_number": "B3",
+    "floor": "First Floor",
+    "monthly_rent": "5000.00",
+    "target_advance_amount": "15000.00",
+    "is_vacant": false,
+    "maintenance_type": "PER_MEMBER",
+    "maintenance_charges": "1000.00",
+    "maintenance_rate_per_member": "250.00"
+  }
+},
+{
+  "model": "Smartnestapp.room",
+  "pk": 14,
+  "fields": {
+    "building": 1,
+    "room_number": "B4",
+    "floor": "First Floor",
+    "monthly_rent": "6000.00",
+    "target_advance_amount": "15000.00",
+    "is_vacant": false,
+    "maintenance_type": "PER_ROOM",
+    "maintenance_charges": "0.00",
+    "maintenance_rate_per_member": "250.00"
+  }
+},
+{
+  "model": "Smartnestapp.room",
+  "pk": 15,
+  "fields": {
+    "building": 1,
+    "room_number": "B5",
+    "floor": "First Floor",
+    "monthly_rent": "5000.00",
+    "target_advance_amount": "10000.00",
+    "is_vacant": false,
+    "maintenance_type": "PER_ROOM",
+    "maintenance_charges": "0.00",
+    "maintenance_rate_per_member": "250.00"
+  }
+},
+{
+  "model": "Smartnestapp.room",
+  "pk": 16,
+  "fields": {
+    "building": 1,
+    "room_number": "B6",
+    "floor": "First Floor",
+    "monthly_rent": "5000.00",
+    "target_advance_amount": "15000.00",
+    "is_vacant": false,
+    "maintenance_type": "PER_MEMBER",
+    "maintenance_charges": "750.00",
+    "maintenance_rate_per_member": "250.00"
+  }
+},
+{
+  "model": "Smartnestapp.room",
+  "pk": 17,
+  "fields": {
+    "building": 1,
+    "room_number": "B7",
+    "floor": "First Floor",
+    "monthly_rent": "5000.00",
+    "target_advance_amount": "15000.00",
+    "is_vacant": false,
+    "maintenance_type": "PER_MEMBER",
+    "maintenance_charges": "750.00",
+    "maintenance_rate_per_member": "250.00"
+  }
+},
+{
+  "model": "Smartnestapp.room",
+  "pk": 18,
+  "fields": {
+    "building": 1,
+    "room_number": "B8",
+    "floor": "First Floor",
+    "monthly_rent": "5000.00",
+    "target_advance_amount": "15000.00",
+    "is_vacant": false,
+    "maintenance_type": "PER_MEMBER",
+    "maintenance_charges": "750.00",
+    "maintenance_rate_per_member": "250.00"
+  }
+},
+{
+  "model": "Smartnestapp.room",
+  "pk": 19,
+  "fields": {
+    "building": 1,
+    "room_number": "B9",
+    "floor": "First Floor",
+    "monthly_rent": "5000.00",
+    "target_advance_amount": "15000.00",
+    "is_vacant": false,
+    "maintenance_type": "PER_MEMBER",
+    "maintenance_charges": "750.00",
+    "maintenance_rate_per_member": "250.00"
+  }
+},
+{
+  "model": "Smartnestapp.room",
+  "pk": 20,
+  "fields": {
+    "building": 1,
+    "room_number": "B10",
+    "floor": "First Floor",
+    "monthly_rent": "6000.00",
+    "target_advance_amount": "10000.00",
+    "is_vacant": false,
+    "maintenance_type": "PER_ROOM",
+    "maintenance_charges": "0.00",
+    "maintenance_rate_per_member": "250.00"
+  }
+},
+{
+  "model": "Smartnestapp.room",
+  "pk": 21,
+  "fields": {
+    "building": 1,
+    "room_number": "C1",
+    "floor": "2nd Floor",
+    "monthly_rent": "18000.00",
+    "target_advance_amount": "15000.00",
+    "is_vacant": false,
+    "maintenance_type": "PER_ROOM",
+    "maintenance_charges": "0.00",
+    "maintenance_rate_per_member": "250.00"
+  }
+},
+{
+  "model": "Smartnestapp.room",
+  "pk": 22,
+  "fields": {
+    "building": 1,
+    "room_number": "C2",
+    "floor": "2nd Floor",
+    "monthly_rent": "8000.00",
+    "target_advance_amount": "15000.00",
+    "is_vacant": false,
+    "maintenance_type": "PER_ROOM",
+    "maintenance_charges": "0.00",
+    "maintenance_rate_per_member": "250.00"
+  }
+},
+{
+  "model": "Smartnestapp.room",
+  "pk": 23,
+  "fields": {
+    "building": 1,
+    "room_number": "C3",
+    "floor": "2nd Floor",
+    "monthly_rent": "11250.00",
+    "target_advance_amount": "20000.00",
+    "is_vacant": false,
+    "maintenance_type": "PER_ROOM",
+    "maintenance_charges": "0.00",
+    "maintenance_rate_per_member": "250.00"
+  }
+},
+{
+  "model": "Smartnestapp.room",
+  "pk": 24,
+  "fields": {
+    "building": 1,
+    "room_number": "C4",
+    "floor": "2nd Floor",
+    "monthly_rent": "8000.00",
+    "target_advance_amount": "20000.00",
+    "is_vacant": false,
+    "maintenance_type": "PER_ROOM",
+    "maintenance_charges": "0.00",
+    "maintenance_rate_per_member": "250.00"
+  }
+},
+{
+  "model": "Smartnestapp.room",
+  "pk": 25,
+  "fields": {
+    "building": 1,
+    "room_number": "C5",
+    "floor": "2nd Floor",
+    "monthly_rent": "4500.00",
+    "target_advance_amount": "10000.00",
+    "is_vacant": false,
+    "maintenance_type": "PER_ROOM",
+    "maintenance_charges": "0.00",
+    "maintenance_rate_per_member": "250.00"
+  }
+},
+{
+  "model": "Smartnestapp.room",
+  "pk": 26,
+  "fields": {
+    "building": 2,
+    "room_number": "R1",
+    "floor": "Ground Floor",
+    "monthly_rent": "8000.00",
+    "target_advance_amount": "20000.00",
+    "is_vacant": false,
+    "maintenance_type": "PER_ROOM",
+    "maintenance_charges": "0.00",
+    "maintenance_rate_per_member": "250.00"
+  }
+},
+{
+  "model": "Smartnestapp.room",
+  "pk": 27,
+  "fields": {
+    "building": 2,
+    "room_number": "R2",
+    "floor": "Ground Floor",
+    "monthly_rent": "8000.00",
+    "target_advance_amount": "20000.00",
+    "is_vacant": false,
+    "maintenance_type": "PER_ROOM",
+    "maintenance_charges": "0.00",
+    "maintenance_rate_per_member": "250.00"
+  }
+},
+{
+  "model": "Smartnestapp.room",
+  "pk": 28,
+  "fields": {
+    "building": 2,
+    "room_number": "R3",
+    "floor": "Ground Floor",
+    "monthly_rent": "4500.00",
+    "target_advance_amount": "10000.00",
+    "is_vacant": false,
+    "maintenance_type": "PER_ROOM",
+    "maintenance_charges": "0.00",
+    "maintenance_rate_per_member": "250.00"
+  }
+},
+{
+  "model": "Smartnestapp.room",
+  "pk": 29,
+  "fields": {
+    "building": 2,
+    "room_number": "R4",
+    "floor": "Ground Floor",
+    "monthly_rent": "4500.00",
+    "target_advance_amount": "10000.00",
+    "is_vacant": false,
+    "maintenance_type": "PER_ROOM",
+    "maintenance_charges": "0.00",
+    "maintenance_rate_per_member": "250.00"
+  }
+},
+{
+  "model": "Smartnestapp.room",
+  "pk": 30,
+  "fields": {
+    "building": 2,
+    "room_number": "R5",
+    "floor": "First Floor",
+    "monthly_rent": "6000.00",
+    "target_advance_amount": "15000.00",
+    "is_vacant": false,
+    "maintenance_type": "PER_ROOM",
+    "maintenance_charges": "0.00",
+    "maintenance_rate_per_member": "250.00"
+  }
+},
+{
+  "model": "Smartnestapp.room",
+  "pk": 31,
+  "fields": {
+    "building": 2,
+    "room_number": "R6",
+    "floor": "First Floor",
+    "monthly_rent": "6000.00",
+    "target_advance_amount": "10000.00",
+    "is_vacant": false,
+    "maintenance_type": "PER_ROOM",
+    "maintenance_charges": "0.00",
+    "maintenance_rate_per_member": "250.00"
+  }
+},
+{
+  "model": "Smartnestapp.room",
+  "pk": 32,
+  "fields": {
+    "building": 2,
+    "room_number": "R7",
+    "floor": "First Floor",
+    "monthly_rent": "6000.00",
+    "target_advance_amount": "10000.00",
+    "is_vacant": false,
+    "maintenance_type": "PER_MEMBER",
+    "maintenance_charges": "1200.00",
+    "maintenance_rate_per_member": "200.00"
+  }
+},
+{
+  "model": "Smartnestapp.room",
+  "pk": 33,
+  "fields": {
+    "building": 2,
+    "room_number": "R8",
+    "floor": "First Floor",
+    "monthly_rent": "6000.00",
+    "target_advance_amount": "10000.00",
+    "is_vacant": false,
+    "maintenance_type": "PER_ROOM",
+    "maintenance_charges": "0.00",
+    "maintenance_rate_per_member": "250.00"
+  }
+},
+{
+  "model": "Smartnestapp.tenant",
+  "pk": 12,
+  "fields": {
+    "room": 1,
+    "primary_name": "Durai",
+    "phone_number": "9087654321",
+    "members_names": "Durai wife, his son",
+    "lease_start_date": "2024-09-16",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.tenant",
+  "pk": 13,
+  "fields": {
+    "room": 2,
+    "primary_name": "Rupak",
+    "phone_number": "9944046241",
+    "members_names": "Rupak, his wife",
+    "lease_start_date": "2026-05-14",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.tenant",
+  "pk": 14,
+  "fields": {
+    "room": 3,
+    "primary_name": "Sekar",
+    "phone_number": "9941708258",
+    "members_names": "Sekar, Manju",
+    "lease_start_date": "2025-03-05",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.tenant",
+  "pk": 15,
+  "fields": {
+    "room": 6,
+    "primary_name": "Murugan",
+    "phone_number": "7397268088",
+    "members_names": "Murugan",
+    "lease_start_date": "2026-02-12",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.tenant",
+  "pk": 16,
+  "fields": {
+    "room": 7,
+    "primary_name": "Siba",
+    "phone_number": "8144782968",
+    "members_names": "siba, his wife",
+    "lease_start_date": "2025-12-28",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.tenant",
+  "pk": 17,
+  "fields": {
+    "room": 4,
+    "primary_name": "Karthi",
+    "phone_number": "9876543211",
+    "members_names": "karthi,theanmozhi",
+    "lease_start_date": "2026-10-28",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.tenant",
+  "pk": 18,
+  "fields": {
+    "room": 5,
+    "primary_name": "Shankar",
+    "phone_number": "8765432109",
+    "members_names": "Shankar",
+    "lease_start_date": "2026-10-28",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.tenant",
+  "pk": 19,
+  "fields": {
+    "room": 8,
+    "primary_name": "Incprin packaging",
+    "phone_number": "8072472022",
+    "members_names": "Girl 1, girl 2",
+    "lease_start_date": "2026-08-12",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.tenant",
+  "pk": 20,
+  "fields": {
+    "room": 9,
+    "primary_name": "Thabita",
+    "phone_number": "6900453983",
+    "members_names": "Thabitha, sanjana",
+    "lease_start_date": "2026-07-23",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.tenant",
+  "pk": 21,
+  "fields": {
+    "room": 10,
+    "primary_name": "Ace Profile",
+    "phone_number": "9962581133",
+    "members_names": "",
+    "lease_start_date": "2023-08-27",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.tenant",
+  "pk": 22,
+  "fields": {
+    "room": 11,
+    "primary_name": "CJ Enterprises",
+    "phone_number": "9943388833",
+    "members_names": "thirumal, raja",
+    "lease_start_date": "2026-09-15",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.tenant",
+  "pk": 23,
+  "fields": {
+    "room": 12,
+    "primary_name": "Rangaraj",
+    "phone_number": "9843070311",
+    "members_names": "thirunath,luthru,mokun,karmon",
+    "lease_start_date": "2026-06-17",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.tenant",
+  "pk": 24,
+  "fields": {
+    "room": 13,
+    "primary_name": "CJ Enterprises",
+    "phone_number": "9943388833",
+    "members_names": "Mathai,maya,ganesh,raja",
+    "lease_start_date": "2026-07-17",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.tenant",
+  "pk": 25,
+  "fields": {
+    "room": 14,
+    "primary_name": "Chennai Kitchen Equipments",
+    "phone_number": "9600023801",
+    "members_names": "Farhan,sadham,irfan",
+    "lease_start_date": "2025-11-10",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.tenant",
+  "pk": 26,
+  "fields": {
+    "room": 15,
+    "primary_name": "Chennai Kitchen Equipments",
+    "phone_number": "9600023801",
+    "members_names": "sameer,shaif",
+    "lease_start_date": "2025-11-07",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.tenant",
+  "pk": 27,
+  "fields": {
+    "room": 16,
+    "primary_name": "CJ Enterprises",
+    "phone_number": "9943388833",
+    "members_names": "Baboon, nimbu,surendra",
+    "lease_start_date": "2025-12-17",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.tenant",
+  "pk": 28,
+  "fields": {
+    "room": 17,
+    "primary_name": "CJ Enterprises",
+    "phone_number": "9943388833",
+    "members_names": "Raju,manoj,navin",
+    "lease_start_date": "2024-01-13",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.tenant",
+  "pk": 29,
+  "fields": {
+    "room": 18,
+    "primary_name": "CJ Enterprises",
+    "phone_number": "9943388833",
+    "members_names": "Rabindra,sanjay,laxman",
+    "lease_start_date": "2025-07-01",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.tenant",
+  "pk": 30,
+  "fields": {
+    "room": 19,
+    "primary_name": "CJ Enterprises",
+    "phone_number": "9943388833",
+    "members_names": "Jagath, ganesh, raja",
+    "lease_start_date": "2024-02-12",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.tenant",
+  "pk": 31,
+  "fields": {
+    "room": 20,
+    "primary_name": "Kumar",
+    "phone_number": "9841292502",
+    "members_names": "Kannan,his son,1 person",
+    "lease_start_date": "2023-11-01",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.tenant",
+  "pk": 32,
+  "fields": {
+    "room": 21,
+    "primary_name": "RL company",
+    "phone_number": "9282167675",
+    "members_names": "Megnath,umesh,jitendar,bhola,person1,person2,perosn3",
+    "lease_start_date": "2026-01-05",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.tenant",
+  "pk": 33,
+  "fields": {
+    "room": 22,
+    "primary_name": "DKR Engg",
+    "phone_number": "8056169968",
+    "members_names": "Bhavani,pintu,kunal",
+    "lease_start_date": "2025-06-18",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.tenant",
+  "pk": 34,
+  "fields": {
+    "room": 23,
+    "primary_name": "Rangaraj",
+    "phone_number": "9843070311",
+    "members_names": "hirasingh,basu,navin,emdhar,mokara",
+    "lease_start_date": "2026-06-17",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.tenant",
+  "pk": 35,
+  "fields": {
+    "room": 24,
+    "primary_name": "MAK interiors",
+    "phone_number": "9025611249",
+    "members_names": "Suraj,rohit,pradeep",
+    "lease_start_date": "2026-05-13",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.tenant",
+  "pk": 36,
+  "fields": {
+    "room": 25,
+    "primary_name": "Raja painter",
+    "phone_number": "8050667839",
+    "members_names": "Raja",
+    "lease_start_date": "2026-03-09",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.tenant",
+  "pk": 37,
+  "fields": {
+    "room": 26,
+    "primary_name": "TGF",
+    "phone_number": "9498302054",
+    "members_names": "a,b,c,d",
+    "lease_start_date": "2025-09-20",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.tenant",
+  "pk": 38,
+  "fields": {
+    "room": 27,
+    "primary_name": "TGF",
+    "phone_number": "9498302054",
+    "members_names": "E,f,g,h",
+    "lease_start_date": "2025-07-15",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.tenant",
+  "pk": 39,
+  "fields": {
+    "room": 28,
+    "primary_name": "Vijaya sister",
+    "phone_number": "9150347772",
+    "members_names": "vijay,vijaya sister",
+    "lease_start_date": "2024-06-19",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.tenant",
+  "pk": 40,
+  "fields": {
+    "room": 29,
+    "primary_name": "Susai",
+    "phone_number": "8939300297",
+    "members_names": "Susai, Vijaya",
+    "lease_start_date": "2025-06-24",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.tenant",
+  "pk": 41,
+  "fields": {
+    "room": 30,
+    "primary_name": "Subash",
+    "phone_number": "9360578908",
+    "members_names": "Subash, mamata",
+    "lease_start_date": "2024-07-01",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.tenant",
+  "pk": 42,
+  "fields": {
+    "room": 31,
+    "primary_name": "JR Equipment",
+    "phone_number": "9841058387",
+    "members_names": "Hari,his wife,son,daughter",
+    "lease_start_date": "2024-07-15",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.tenant",
+  "pk": 43,
+  "fields": {
+    "room": 32,
+    "primary_name": "Sarvan Beer",
+    "phone_number": "6379008180",
+    "members_names": "sarvan,naari,beer,beer brother,his wife,daughter1,daughter2",
+    "lease_start_date": "2025-06-11",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.tenant",
+  "pk": 44,
+  "fields": {
+    "room": 33,
+    "primary_name": "JR Equipment",
+    "phone_number": "9841058387",
+    "members_names": "Subham",
+    "lease_start_date": "2024-01-01",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.advancedetail",
+  "pk": 1,
+  "fields": {
+    "room": 1,
+    "tenant": 12,
+    "amount_paid": "10000.00",
+    "payment_method": "CASH",
+    "status": "paid",
+    "payment_date": "2024-09-16",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.advancedetail",
+  "pk": 2,
+  "fields": {
+    "room": 2,
+    "tenant": 13,
+    "amount_paid": "5000.00",
+    "payment_method": "UPI",
+    "status": "pending",
+    "payment_date": "2026-05-14",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.advancedetail",
+  "pk": 3,
+  "fields": {
+    "room": 3,
+    "tenant": 14,
+    "amount_paid": "10000.00",
+    "payment_method": "CASH",
+    "status": "paid",
+    "payment_date": "2025-03-05",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.advancedetail",
+  "pk": 4,
+  "fields": {
+    "room": 4,
+    "tenant": 17,
+    "amount_paid": "0.00",
+    "payment_method": "UPI",
+    "status": "no_advance",
+    "payment_date": "2026-10-28",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.advancedetail",
+  "pk": 5,
+  "fields": {
+    "room": 5,
+    "tenant": 18,
+    "amount_paid": "10000.00",
+    "payment_method": "CASH",
+    "status": "paid",
+    "payment_date": "2026-10-28",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.advancedetail",
+  "pk": 6,
+  "fields": {
+    "room": 6,
+    "tenant": 15,
+    "amount_paid": "10000.00",
+    "payment_method": "CASH",
+    "status": "paid",
+    "payment_date": "2026-02-12",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.advancedetail",
+  "pk": 7,
+  "fields": {
+    "room": 7,
+    "tenant": 16,
+    "amount_paid": "5000.00",
+    "payment_method": "UPI",
+    "status": "pending",
+    "payment_date": "2025-12-28",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.advancedetail",
+  "pk": 8,
+  "fields": {
+    "room": 8,
+    "tenant": 19,
+    "amount_paid": "15000.00",
+    "payment_method": "UPI",
+    "status": "paid",
+    "payment_date": "2026-08-12",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.advancedetail",
+  "pk": 9,
+  "fields": {
+    "room": 9,
+    "tenant": 20,
+    "amount_paid": "15000.00",
+    "payment_method": "UPI",
+    "status": "paid",
+    "payment_date": "2026-07-23",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.advancedetail",
+  "pk": 10,
+  "fields": {
+    "room": 10,
+    "tenant": 21,
+    "amount_paid": "10000.00",
+    "payment_method": "UPI",
+    "status": "paid",
+    "payment_date": "2023-08-27",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.advancedetail",
+  "pk": 11,
+  "fields": {
+    "room": 11,
+    "tenant": 22,
+    "amount_paid": "15000.00",
+    "payment_method": "UPI",
+    "status": "paid",
+    "payment_date": "2026-09-15",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.advancedetail",
+  "pk": 12,
+  "fields": {
+    "room": 12,
+    "tenant": 23,
+    "amount_paid": "20000.00",
+    "payment_method": "UPI",
+    "status": "paid",
+    "payment_date": "2026-06-17",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.advancedetail",
+  "pk": 13,
+  "fields": {
+    "room": 13,
+    "tenant": 24,
+    "amount_paid": "15000.00",
+    "payment_method": "UPI",
+    "status": "paid",
+    "payment_date": "2026-07-17",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.advancedetail",
+  "pk": 14,
+  "fields": {
+    "room": 14,
+    "tenant": 25,
+    "amount_paid": "15000.00",
+    "payment_method": "CASH",
+    "status": "paid",
+    "payment_date": "2025-11-11",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.advancedetail",
+  "pk": 15,
+  "fields": {
+    "room": 15,
+    "tenant": 26,
+    "amount_paid": "10000.00",
+    "payment_method": "UPI",
+    "status": "paid",
+    "payment_date": "2025-11-07",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.advancedetail",
+  "pk": 16,
+  "fields": {
+    "room": 16,
+    "tenant": 27,
+    "amount_paid": "15000.00",
+    "payment_method": "UPI",
+    "status": "paid",
+    "payment_date": "2025-12-17",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.advancedetail",
+  "pk": 17,
+  "fields": {
+    "room": 17,
+    "tenant": 28,
+    "amount_paid": "15000.00",
+    "payment_method": "UPI",
+    "status": "paid",
+    "payment_date": "2024-01-13",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.advancedetail",
+  "pk": 18,
+  "fields": {
+    "room": 18,
+    "tenant": 29,
+    "amount_paid": "15000.00",
+    "payment_method": "UPI",
+    "status": "paid",
+    "payment_date": "2025-07-01",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.advancedetail",
+  "pk": 19,
+  "fields": {
+    "room": 19,
+    "tenant": 30,
+    "amount_paid": "15000.00",
+    "payment_method": "UPI",
+    "status": "paid",
+    "payment_date": "2024-02-12",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.advancedetail",
+  "pk": 20,
+  "fields": {
+    "room": 21,
+    "tenant": 32,
+    "amount_paid": "0.00",
+    "payment_method": "UPI",
+    "status": "no_advance",
+    "payment_date": "2020-01-01",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.advancedetail",
+  "pk": 21,
+  "fields": {
+    "room": 22,
+    "tenant": 33,
+    "amount_paid": "15000.00",
+    "payment_method": "UPI",
+    "status": "paid",
+    "payment_date": "2025-06-18",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.advancedetail",
+  "pk": 22,
+  "fields": {
+    "room": 23,
+    "tenant": 34,
+    "amount_paid": "20000.00",
+    "payment_method": "UPI",
+    "status": "paid",
+    "payment_date": "2026-06-17",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.advancedetail",
+  "pk": 23,
+  "fields": {
+    "room": 24,
+    "tenant": 35,
+    "amount_paid": "20000.00",
+    "payment_method": "UPI",
+    "status": "paid",
+    "payment_date": "2026-05-13",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.advancedetail",
+  "pk": 24,
+  "fields": {
+    "room": 25,
+    "tenant": 36,
+    "amount_paid": "10000.00",
+    "payment_method": "CASH",
+    "status": "paid",
+    "payment_date": "2026-03-09",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.advancedetail",
+  "pk": 25,
+  "fields": {
+    "room": 20,
+    "tenant": 31,
+    "amount_paid": "10000.00",
+    "payment_method": "CASH",
+    "status": "paid",
+    "payment_date": "2023-11-01",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.advancedetail",
+  "pk": 26,
+  "fields": {
+    "room": 26,
+    "tenant": 37,
+    "amount_paid": "20000.00",
+    "payment_method": "UPI",
+    "status": "paid",
+    "payment_date": "2025-09-11",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.advancedetail",
+  "pk": 27,
+  "fields": {
+    "room": 27,
+    "tenant": 38,
+    "amount_paid": "20000.00",
+    "payment_method": "UPI",
+    "status": "paid",
+    "payment_date": "2025-07-15",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.advancedetail",
+  "pk": 28,
+  "fields": {
+    "room": 28,
+    "tenant": 39,
+    "amount_paid": "10000.00",
+    "payment_method": "UPI",
+    "status": "paid",
+    "payment_date": "2024-06-19",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.advancedetail",
+  "pk": 29,
+  "fields": {
+    "room": 29,
+    "tenant": 40,
+    "amount_paid": "9000.00",
+    "payment_method": "CASH",
+    "status": "pending",
+    "payment_date": "2025-06-24",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.advancedetail",
+  "pk": 30,
+  "fields": {
+    "room": 30,
+    "tenant": 41,
+    "amount_paid": "15000.00",
+    "payment_method": "UPI",
+    "status": "paid",
+    "payment_date": "2024-07-01",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.advancedetail",
+  "pk": 31,
+  "fields": {
+    "room": 31,
+    "tenant": 42,
+    "amount_paid": "10000.00",
+    "payment_method": "UPI",
+    "status": "paid",
+    "payment_date": "2024-07-15",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.advancedetail",
+  "pk": 32,
+  "fields": {
+    "room": 32,
+    "tenant": 43,
+    "amount_paid": "5000.00",
+    "payment_method": "CASH",
+    "status": "pending",
+    "payment_date": "2025-06-11",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.advancedetail",
+  "pk": 33,
+  "fields": {
+    "room": 33,
+    "tenant": 44,
+    "amount_paid": "10000.00",
+    "payment_method": "CASH",
+    "status": "paid",
+    "payment_date": "2026-01-01",
+    "is_active": true
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 9,
+  "fields": {
+    "room": 11,
+    "month_year": "2026-10-01",
+    "previous_reading": "1053.00",
+    "current_reading": "1096.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-10-27T12:07:31.199Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 10,
+  "fields": {
+    "room": 20,
+    "month_year": "2026-10-01",
+    "previous_reading": "1408.00",
+    "current_reading": "1457.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-10-27T12:07:31.210Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 11,
+  "fields": {
+    "room": 12,
+    "month_year": "2026-10-01",
+    "previous_reading": "946.00",
+    "current_reading": "985.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-10-27T12:07:31.222Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 12,
+  "fields": {
+    "room": 13,
+    "month_year": "2026-10-01",
+    "previous_reading": "1983.00",
+    "current_reading": "2027.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-10-27T12:07:31.231Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 13,
+  "fields": {
+    "room": 14,
+    "month_year": "2026-10-01",
+    "previous_reading": "1105.00",
+    "current_reading": "1147.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-10-27T12:07:31.243Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 14,
+  "fields": {
+    "room": 15,
+    "month_year": "2026-10-01",
+    "previous_reading": "1592.00",
+    "current_reading": "1622.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-10-27T12:07:31.258Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 15,
+  "fields": {
+    "room": 16,
+    "month_year": "2026-10-01",
+    "previous_reading": "1229.00",
+    "current_reading": "1283.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-10-27T12:07:31.265Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 16,
+  "fields": {
+    "room": 17,
+    "month_year": "2026-10-01",
+    "previous_reading": "976.00",
+    "current_reading": "1017.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-10-27T12:07:31.275Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 17,
+  "fields": {
+    "room": 18,
+    "month_year": "2026-10-01",
+    "previous_reading": "1156.00",
+    "current_reading": "1203.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-10-27T12:07:31.287Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 18,
+  "fields": {
+    "room": 19,
+    "month_year": "2026-10-01",
+    "previous_reading": "850.00",
+    "current_reading": "880.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-10-27T12:07:31.295Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 19,
+  "fields": {
+    "room": 1,
+    "month_year": "2026-10-01",
+    "previous_reading": "969.00",
+    "current_reading": "1031.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-10-27T12:07:31.305Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 20,
+  "fields": {
+    "room": 10,
+    "month_year": "2026-10-01",
+    "previous_reading": "988.00",
+    "current_reading": "1041.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-10-27T12:07:31.313Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 21,
+  "fields": {
+    "room": 2,
+    "month_year": "2026-10-01",
+    "previous_reading": "206.00",
+    "current_reading": "262.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-10-27T12:07:31.325Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 22,
+  "fields": {
+    "room": 3,
+    "month_year": "2026-10-01",
+    "previous_reading": "1125.00",
+    "current_reading": "1171.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-10-27T12:07:31.332Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 23,
+  "fields": {
+    "room": 4,
+    "month_year": "2026-10-01",
+    "previous_reading": "1185.00",
+    "current_reading": "1206.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-10-27T12:07:31.341Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 24,
+  "fields": {
+    "room": 5,
+    "month_year": "2026-10-01",
+    "previous_reading": "1659.00",
+    "current_reading": "1691.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-10-27T12:07:31.349Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 25,
+  "fields": {
+    "room": 6,
+    "month_year": "2026-10-01",
+    "previous_reading": "1237.00",
+    "current_reading": "1278.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-10-27T12:07:31.359Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 26,
+  "fields": {
+    "room": 7,
+    "month_year": "2026-10-01",
+    "previous_reading": "1183.00",
+    "current_reading": "1231.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-10-27T12:07:31.367Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 27,
+  "fields": {
+    "room": 8,
+    "month_year": "2026-10-01",
+    "previous_reading": "1044.00",
+    "current_reading": "1070.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-10-27T12:07:31.375Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 28,
+  "fields": {
+    "room": 9,
+    "month_year": "2026-10-01",
+    "previous_reading": "215.00",
+    "current_reading": "244.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-10-27T12:07:31.381Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 29,
+  "fields": {
+    "room": 30,
+    "month_year": "2026-10-01",
+    "previous_reading": "2332.00",
+    "current_reading": "2392.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-10-27T12:07:31.388Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 30,
+  "fields": {
+    "room": 31,
+    "month_year": "2026-10-01",
+    "previous_reading": "3241.00",
+    "current_reading": "3285.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-10-27T12:07:31.395Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 31,
+  "fields": {
+    "room": 32,
+    "month_year": "2026-10-01",
+    "previous_reading": "3369.00",
+    "current_reading": "3436.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-10-27T12:07:31.404Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 32,
+  "fields": {
+    "room": 33,
+    "month_year": "2026-10-01",
+    "previous_reading": "2487.00",
+    "current_reading": "2523.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-10-27T12:07:31.411Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 33,
+  "fields": {
+    "room": 26,
+    "month_year": "2026-10-01",
+    "previous_reading": "4246.00",
+    "current_reading": "4411.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-10-27T12:07:31.418Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 34,
+  "fields": {
+    "room": 27,
+    "month_year": "2026-10-01",
+    "previous_reading": "3935.00",
+    "current_reading": "4003.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-10-27T12:07:31.425Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 35,
+  "fields": {
+    "room": 28,
+    "month_year": "2026-10-01",
+    "previous_reading": "2055.00",
+    "current_reading": "2055.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-10-27T12:07:31.432Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 36,
+  "fields": {
+    "room": 29,
+    "month_year": "2026-10-01",
+    "previous_reading": "6205.00",
+    "current_reading": "6307.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-10-27T12:07:31.439Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 38,
+  "fields": {
+    "room": 21,
+    "month_year": "2026-10-01",
+    "previous_reading": "1246.00",
+    "current_reading": "1297.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-10-29T06:03:53.633Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 39,
+  "fields": {
+    "room": 23,
+    "month_year": "2026-10-01",
+    "previous_reading": "1050.00",
+    "current_reading": "1085.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-10-29T06:03:53.660Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 40,
+  "fields": {
+    "room": 24,
+    "month_year": "2026-10-01",
+    "previous_reading": "1838.00",
+    "current_reading": "1898.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-10-29T06:03:53.672Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 41,
+  "fields": {
+    "room": 22,
+    "month_year": "2026-10-01",
+    "previous_reading": "1427.00",
+    "current_reading": "1486.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-10-29T06:25:39.730Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 42,
+  "fields": {
+    "room": 25,
+    "month_year": "2026-10-01",
+    "previous_reading": "1661.00",
+    "current_reading": "1687.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-10-29T06:25:39.773Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 43,
+  "fields": {
+    "room": 1,
+    "month_year": "2026-11-01",
+    "previous_reading": "1031.00",
+    "current_reading": "1078.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-11-02T12:53:58.046Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 44,
+  "fields": {
+    "room": 2,
+    "month_year": "2026-11-01",
+    "previous_reading": "262.00",
+    "current_reading": "352.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-11-02T12:53:58.061Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 45,
+  "fields": {
+    "room": 3,
+    "month_year": "2026-11-01",
+    "previous_reading": "1171.00",
+    "current_reading": "1237.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-11-02T12:53:58.074Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 46,
+  "fields": {
+    "room": 4,
+    "month_year": "2026-11-01",
+    "previous_reading": "1206.00",
+    "current_reading": "1215.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-11-02T12:53:58.085Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 47,
+  "fields": {
+    "room": 5,
+    "month_year": "2026-11-01",
+    "previous_reading": "1691.00",
+    "current_reading": "1700.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-11-02T12:53:58.094Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 48,
+  "fields": {
+    "room": 6,
+    "month_year": "2026-11-01",
+    "previous_reading": "1278.00",
+    "current_reading": "1325.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-11-02T12:53:58.118Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 49,
+  "fields": {
+    "room": 7,
+    "month_year": "2026-11-01",
+    "previous_reading": "1231.00",
+    "current_reading": "1271.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-11-02T12:53:58.127Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 50,
+  "fields": {
+    "room": 8,
+    "month_year": "2026-11-01",
+    "previous_reading": "1070.00",
+    "current_reading": "1100.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-11-02T12:53:58.138Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 51,
+  "fields": {
+    "room": 9,
+    "month_year": "2026-11-01",
+    "previous_reading": "244.00",
+    "current_reading": "293.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-11-02T12:53:58.148Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 52,
+  "fields": {
+    "room": 10,
+    "month_year": "2026-11-01",
+    "previous_reading": "1045.00",
+    "current_reading": "1045.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-11-02T12:53:58.159Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 53,
+  "fields": {
+    "room": 11,
+    "month_year": "2026-11-01",
+    "previous_reading": "1096.00",
+    "current_reading": "1169.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-11-02T12:53:58.168Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 54,
+  "fields": {
+    "room": 12,
+    "month_year": "2026-11-01",
+    "previous_reading": "985.00",
+    "current_reading": "1027.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-11-02T12:53:58.178Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 55,
+  "fields": {
+    "room": 13,
+    "month_year": "2026-11-01",
+    "previous_reading": "2027.00",
+    "current_reading": "2068.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-11-02T12:53:58.188Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 56,
+  "fields": {
+    "room": 14,
+    "month_year": "2026-11-01",
+    "previous_reading": "1147.00",
+    "current_reading": "1191.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-11-02T12:53:58.199Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 57,
+  "fields": {
+    "room": 15,
+    "month_year": "2026-11-01",
+    "previous_reading": "1622.00",
+    "current_reading": "1654.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-11-02T12:53:58.209Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 58,
+  "fields": {
+    "room": 16,
+    "month_year": "2026-11-01",
+    "previous_reading": "1283.00",
+    "current_reading": "1335.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-11-02T12:53:58.219Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 59,
+  "fields": {
+    "room": 17,
+    "month_year": "2026-11-01",
+    "previous_reading": "1017.00",
+    "current_reading": "1058.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-11-02T12:53:58.228Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 60,
+  "fields": {
+    "room": 18,
+    "month_year": "2026-11-01",
+    "previous_reading": "1203.00",
+    "current_reading": "1258.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-11-02T12:53:58.240Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 61,
+  "fields": {
+    "room": 19,
+    "month_year": "2026-11-01",
+    "previous_reading": "880.00",
+    "current_reading": "914.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-11-02T12:53:58.251Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 62,
+  "fields": {
+    "room": 20,
+    "month_year": "2026-11-01",
+    "previous_reading": "1457.00",
+    "current_reading": "1511.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-11-02T12:53:58.260Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 63,
+  "fields": {
+    "room": 21,
+    "month_year": "2026-11-01",
+    "previous_reading": "1297.00",
+    "current_reading": "1343.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-11-02T12:53:58.271Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 64,
+  "fields": {
+    "room": 22,
+    "month_year": "2026-11-01",
+    "previous_reading": "1486.00",
+    "current_reading": "1551.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-11-02T12:53:58.281Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 65,
+  "fields": {
+    "room": 23,
+    "month_year": "2026-11-01",
+    "previous_reading": "1085.00",
+    "current_reading": "1139.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-11-02T12:53:58.292Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 66,
+  "fields": {
+    "room": 24,
+    "month_year": "2026-11-01",
+    "previous_reading": "1898.00",
+    "current_reading": "1956.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-11-02T12:53:58.301Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 67,
+  "fields": {
+    "room": 25,
+    "month_year": "2026-11-01",
+    "previous_reading": "1687.00",
+    "current_reading": "1715.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-11-02T12:53:58.311Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 68,
+  "fields": {
+    "room": 26,
+    "month_year": "2026-11-01",
+    "previous_reading": "4411.00",
+    "current_reading": "4600.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-11-02T12:53:58.322Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 69,
+  "fields": {
+    "room": 27,
+    "month_year": "2026-11-01",
+    "previous_reading": "4003.00",
+    "current_reading": "4112.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-11-02T12:53:58.333Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 70,
+  "fields": {
+    "room": 28,
+    "month_year": "2026-11-01",
+    "previous_reading": "2055.00",
+    "current_reading": "2056.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-11-02T12:53:58.343Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 71,
+  "fields": {
+    "room": 29,
+    "month_year": "2026-11-01",
+    "previous_reading": "6307.00",
+    "current_reading": "6414.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-11-02T12:53:58.353Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 72,
+  "fields": {
+    "room": 30,
+    "month_year": "2026-11-01",
+    "previous_reading": "2392.00",
+    "current_reading": "2447.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-11-02T12:53:58.363Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 73,
+  "fields": {
+    "room": 31,
+    "month_year": "2026-11-01",
+    "previous_reading": "3285.00",
+    "current_reading": "3340.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-11-02T12:53:58.373Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 74,
+  "fields": {
+    "room": 32,
+    "month_year": "2026-11-01",
+    "previous_reading": "3436.00",
+    "current_reading": "3500.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-11-02T12:53:58.384Z"
+  }
+},
+{
+  "model": "Smartnestapp.electricityreading",
+  "pk": 75,
+  "fields": {
+    "room": 33,
+    "month_year": "2026-11-01",
+    "previous_reading": "2523.00",
+    "current_reading": "2561.00",
+    "rate_per_unit": "10.00",
+    "recorded_at": "2026-11-02T12:53:58.394Z"
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 1,
+  "fields": {
+    "room": 21,
+    "tenant": 32,
+    "month": "2026-10-01",
+    "rent_amount": "18000.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "510.00",
+    "last_month_balance": "0.00",
+    "total_amount": "18510.00",
+    "paid_amount": "18510.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": true
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 2,
+  "fields": {
+    "room": 1,
+    "tenant": 12,
+    "month": "2026-10-01",
+    "rent_amount": "6500.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "620.00",
+    "last_month_balance": "0.00",
+    "total_amount": "7120.00",
+    "paid_amount": "6620.00",
+    "payment_method": "CASH",
+    "collection_date": "2026-10-10",
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 3,
+  "fields": {
+    "room": 22,
+    "tenant": 33,
+    "month": "2026-10-01",
+    "rent_amount": "8000.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "590.00",
+    "last_month_balance": "0.00",
+    "total_amount": "8590.00",
+    "paid_amount": "8590.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": true
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 4,
+  "fields": {
+    "room": 2,
+    "tenant": 13,
+    "month": "2026-10-01",
+    "rent_amount": "5500.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "560.00",
+    "last_month_balance": "0.00",
+    "total_amount": "6060.00",
+    "paid_amount": "6060.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": true
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 5,
+  "fields": {
+    "room": 3,
+    "tenant": 14,
+    "month": "2026-10-01",
+    "rent_amount": "5000.00",
+    "maintenance_charge": "500.00",
+    "electricity_charge": "460.00",
+    "last_month_balance": "0.00",
+    "total_amount": "5960.00",
+    "paid_amount": "5860.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 6,
+  "fields": {
+    "room": 4,
+    "tenant": 17,
+    "month": "2026-10-01",
+    "rent_amount": "5500.00",
+    "maintenance_charge": "500.00",
+    "electricity_charge": "210.00",
+    "last_month_balance": "0.00",
+    "total_amount": "6210.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 7,
+  "fields": {
+    "room": 5,
+    "tenant": 18,
+    "month": "2026-10-01",
+    "rent_amount": "5000.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "320.00",
+    "last_month_balance": "0.00",
+    "total_amount": "5320.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 8,
+  "fields": {
+    "room": 6,
+    "tenant": 15,
+    "month": "2026-10-01",
+    "rent_amount": "5000.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "410.00",
+    "last_month_balance": "0.00",
+    "total_amount": "5410.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 9,
+  "fields": {
+    "room": 7,
+    "tenant": 16,
+    "month": "2026-10-01",
+    "rent_amount": "5000.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "480.00",
+    "last_month_balance": "0.00",
+    "total_amount": "5480.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 10,
+  "fields": {
+    "room": 8,
+    "tenant": 19,
+    "month": "2026-10-01",
+    "rent_amount": "5500.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "260.00",
+    "last_month_balance": "0.00",
+    "total_amount": "5760.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 11,
+  "fields": {
+    "room": 9,
+    "tenant": 20,
+    "month": "2026-10-01",
+    "rent_amount": "5500.00",
+    "maintenance_charge": "500.00",
+    "electricity_charge": "290.00",
+    "last_month_balance": "0.00",
+    "total_amount": "6290.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 12,
+  "fields": {
+    "room": 10,
+    "tenant": 21,
+    "month": "2026-10-01",
+    "rent_amount": "5000.00",
+    "maintenance_charge": "500.00",
+    "electricity_charge": "530.00",
+    "last_month_balance": "0.00",
+    "total_amount": "6030.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 13,
+  "fields": {
+    "room": 11,
+    "tenant": 22,
+    "month": "2026-10-01",
+    "rent_amount": "5000.00",
+    "maintenance_charge": "500.00",
+    "electricity_charge": "430.00",
+    "last_month_balance": "0.00",
+    "total_amount": "5930.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 14,
+  "fields": {
+    "room": 12,
+    "tenant": 23,
+    "month": "2026-10-01",
+    "rent_amount": "11250.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "390.00",
+    "last_month_balance": "0.00",
+    "total_amount": "11640.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 15,
+  "fields": {
+    "room": 13,
+    "tenant": 24,
+    "month": "2026-10-01",
+    "rent_amount": "5000.00",
+    "maintenance_charge": "1000.00",
+    "electricity_charge": "440.00",
+    "last_month_balance": "0.00",
+    "total_amount": "6440.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 16,
+  "fields": {
+    "room": 14,
+    "tenant": 25,
+    "month": "2026-10-01",
+    "rent_amount": "6000.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "420.00",
+    "last_month_balance": "0.00",
+    "total_amount": "6420.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 17,
+  "fields": {
+    "room": 15,
+    "tenant": 26,
+    "month": "2026-10-01",
+    "rent_amount": "5000.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "300.00",
+    "last_month_balance": "0.00",
+    "total_amount": "5300.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 18,
+  "fields": {
+    "room": 16,
+    "tenant": 27,
+    "month": "2026-10-01",
+    "rent_amount": "5000.00",
+    "maintenance_charge": "750.00",
+    "electricity_charge": "540.00",
+    "last_month_balance": "0.00",
+    "total_amount": "6290.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 19,
+  "fields": {
+    "room": 17,
+    "tenant": 28,
+    "month": "2026-10-01",
+    "rent_amount": "5000.00",
+    "maintenance_charge": "750.00",
+    "electricity_charge": "410.00",
+    "last_month_balance": "0.00",
+    "total_amount": "6160.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 20,
+  "fields": {
+    "room": 18,
+    "tenant": 29,
+    "month": "2026-10-01",
+    "rent_amount": "5000.00",
+    "maintenance_charge": "750.00",
+    "electricity_charge": "470.00",
+    "last_month_balance": "0.00",
+    "total_amount": "6220.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 21,
+  "fields": {
+    "room": 19,
+    "tenant": 30,
+    "month": "2026-10-01",
+    "rent_amount": "5000.00",
+    "maintenance_charge": "750.00",
+    "electricity_charge": "300.00",
+    "last_month_balance": "0.00",
+    "total_amount": "6050.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 22,
+  "fields": {
+    "room": 20,
+    "tenant": 31,
+    "month": "2026-10-01",
+    "rent_amount": "6000.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "490.00",
+    "last_month_balance": "0.00",
+    "total_amount": "6490.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 23,
+  "fields": {
+    "room": 23,
+    "tenant": 34,
+    "month": "2026-10-01",
+    "rent_amount": "11250.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "350.00",
+    "last_month_balance": "0.00",
+    "total_amount": "11600.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 24,
+  "fields": {
+    "room": 24,
+    "tenant": 35,
+    "month": "2026-10-01",
+    "rent_amount": "8000.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "600.00",
+    "last_month_balance": "0.00",
+    "total_amount": "8600.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 25,
+  "fields": {
+    "room": 25,
+    "tenant": 36,
+    "month": "2026-10-01",
+    "rent_amount": "4500.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "260.00",
+    "last_month_balance": "0.00",
+    "total_amount": "4760.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 26,
+  "fields": {
+    "room": 26,
+    "tenant": 37,
+    "month": "2026-10-01",
+    "rent_amount": "8000.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "1650.00",
+    "last_month_balance": "0.00",
+    "total_amount": "9650.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 27,
+  "fields": {
+    "room": 27,
+    "tenant": 38,
+    "month": "2026-10-01",
+    "rent_amount": "8000.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "680.00",
+    "last_month_balance": "0.00",
+    "total_amount": "8680.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 28,
+  "fields": {
+    "room": 28,
+    "tenant": 39,
+    "month": "2026-10-01",
+    "rent_amount": "4500.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "0.00",
+    "last_month_balance": "0.00",
+    "total_amount": "4500.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 29,
+  "fields": {
+    "room": 29,
+    "tenant": 40,
+    "month": "2026-10-01",
+    "rent_amount": "4500.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "1020.00",
+    "last_month_balance": "0.00",
+    "total_amount": "5520.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 30,
+  "fields": {
+    "room": 30,
+    "tenant": 41,
+    "month": "2026-10-01",
+    "rent_amount": "6000.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "600.00",
+    "last_month_balance": "0.00",
+    "total_amount": "6600.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 31,
+  "fields": {
+    "room": 31,
+    "tenant": 42,
+    "month": "2026-10-01",
+    "rent_amount": "6000.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "440.00",
+    "last_month_balance": "0.00",
+    "total_amount": "6440.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 32,
+  "fields": {
+    "room": 32,
+    "tenant": 43,
+    "month": "2026-10-01",
+    "rent_amount": "6000.00",
+    "maintenance_charge": "1400.00",
+    "electricity_charge": "670.00",
+    "last_month_balance": "0.00",
+    "total_amount": "8070.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 33,
+  "fields": {
+    "room": 33,
+    "tenant": 44,
+    "month": "2026-10-01",
+    "rent_amount": "6000.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "360.00",
+    "last_month_balance": "0.00",
+    "total_amount": "6360.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 34,
+  "fields": {
+    "room": 1,
+    "tenant": 12,
+    "month": "2026-11-01",
+    "rent_amount": "6500.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "470.00",
+    "last_month_balance": "0.00",
+    "total_amount": "6970.00",
+    "paid_amount": "6650.00",
+    "payment_method": "UPI",
+    "collection_date": "2026-11-02",
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 35,
+  "fields": {
+    "room": 2,
+    "tenant": 13,
+    "month": "2026-11-01",
+    "rent_amount": "5500.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "900.00",
+    "last_month_balance": "0.00",
+    "total_amount": "6400.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 36,
+  "fields": {
+    "room": 3,
+    "tenant": 14,
+    "month": "2026-11-01",
+    "rent_amount": "5000.00",
+    "maintenance_charge": "500.00",
+    "electricity_charge": "660.00",
+    "last_month_balance": "0.00",
+    "total_amount": "6160.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 37,
+  "fields": {
+    "room": 4,
+    "tenant": 17,
+    "month": "2026-11-01",
+    "rent_amount": "5500.00",
+    "maintenance_charge": "500.00",
+    "electricity_charge": "90.00",
+    "last_month_balance": "0.00",
+    "total_amount": "6090.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 38,
+  "fields": {
+    "room": 5,
+    "tenant": 18,
+    "month": "2026-11-01",
+    "rent_amount": "5000.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "90.00",
+    "last_month_balance": "0.00",
+    "total_amount": "5090.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 39,
+  "fields": {
+    "room": 6,
+    "tenant": 15,
+    "month": "2026-11-01",
+    "rent_amount": "5000.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "470.00",
+    "last_month_balance": "0.00",
+    "total_amount": "5470.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 40,
+  "fields": {
+    "room": 7,
+    "tenant": 16,
+    "month": "2026-11-01",
+    "rent_amount": "5000.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "400.00",
+    "last_month_balance": "0.00",
+    "total_amount": "5400.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 41,
+  "fields": {
+    "room": 8,
+    "tenant": 19,
+    "month": "2026-11-01",
+    "rent_amount": "5500.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "300.00",
+    "last_month_balance": "0.00",
+    "total_amount": "5800.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 42,
+  "fields": {
+    "room": 9,
+    "tenant": 20,
+    "month": "2026-11-01",
+    "rent_amount": "5500.00",
+    "maintenance_charge": "500.00",
+    "electricity_charge": "490.00",
+    "last_month_balance": "0.00",
+    "total_amount": "6490.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 43,
+  "fields": {
+    "room": 10,
+    "tenant": 21,
+    "month": "2026-11-01",
+    "rent_amount": "5000.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "0.00",
+    "last_month_balance": "0.00",
+    "total_amount": "5000.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 44,
+  "fields": {
+    "room": 11,
+    "tenant": 22,
+    "month": "2026-11-01",
+    "rent_amount": "5000.00",
+    "maintenance_charge": "500.00",
+    "electricity_charge": "730.00",
+    "last_month_balance": "0.00",
+    "total_amount": "6230.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 45,
+  "fields": {
+    "room": 12,
+    "tenant": 23,
+    "month": "2026-11-01",
+    "rent_amount": "11250.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "420.00",
+    "last_month_balance": "0.00",
+    "total_amount": "11670.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 46,
+  "fields": {
+    "room": 13,
+    "tenant": 24,
+    "month": "2026-11-01",
+    "rent_amount": "5000.00",
+    "maintenance_charge": "1000.00",
+    "electricity_charge": "410.00",
+    "last_month_balance": "0.00",
+    "total_amount": "6410.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 47,
+  "fields": {
+    "room": 14,
+    "tenant": 25,
+    "month": "2026-11-01",
+    "rent_amount": "6000.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "440.00",
+    "last_month_balance": "0.00",
+    "total_amount": "6440.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 48,
+  "fields": {
+    "room": 15,
+    "tenant": 26,
+    "month": "2026-11-01",
+    "rent_amount": "5000.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "320.00",
+    "last_month_balance": "0.00",
+    "total_amount": "5320.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 49,
+  "fields": {
+    "room": 16,
+    "tenant": 27,
+    "month": "2026-11-01",
+    "rent_amount": "5000.00",
+    "maintenance_charge": "750.00",
+    "electricity_charge": "520.00",
+    "last_month_balance": "0.00",
+    "total_amount": "6270.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 50,
+  "fields": {
+    "room": 17,
+    "tenant": 28,
+    "month": "2026-11-01",
+    "rent_amount": "5000.00",
+    "maintenance_charge": "750.00",
+    "electricity_charge": "410.00",
+    "last_month_balance": "0.00",
+    "total_amount": "6160.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 51,
+  "fields": {
+    "room": 18,
+    "tenant": 29,
+    "month": "2026-11-01",
+    "rent_amount": "5000.00",
+    "maintenance_charge": "750.00",
+    "electricity_charge": "550.00",
+    "last_month_balance": "0.00",
+    "total_amount": "6300.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 52,
+  "fields": {
+    "room": 19,
+    "tenant": 30,
+    "month": "2026-11-01",
+    "rent_amount": "5000.00",
+    "maintenance_charge": "750.00",
+    "electricity_charge": "340.00",
+    "last_month_balance": "0.00",
+    "total_amount": "6090.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 53,
+  "fields": {
+    "room": 20,
+    "tenant": 31,
+    "month": "2026-11-01",
+    "rent_amount": "6000.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "540.00",
+    "last_month_balance": "0.00",
+    "total_amount": "6540.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 54,
+  "fields": {
+    "room": 21,
+    "tenant": 32,
+    "month": "2026-11-01",
+    "rent_amount": "18000.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "460.00",
+    "last_month_balance": "0.00",
+    "total_amount": "18460.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 55,
+  "fields": {
+    "room": 22,
+    "tenant": 33,
+    "month": "2026-11-01",
+    "rent_amount": "8000.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "650.00",
+    "last_month_balance": "0.00",
+    "total_amount": "8650.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 56,
+  "fields": {
+    "room": 23,
+    "tenant": 34,
+    "month": "2026-11-01",
+    "rent_amount": "11250.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "540.00",
+    "last_month_balance": "0.00",
+    "total_amount": "11790.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 57,
+  "fields": {
+    "room": 24,
+    "tenant": 35,
+    "month": "2026-11-01",
+    "rent_amount": "8000.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "580.00",
+    "last_month_balance": "0.00",
+    "total_amount": "8580.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 58,
+  "fields": {
+    "room": 25,
+    "tenant": 36,
+    "month": "2026-11-01",
+    "rent_amount": "4500.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "280.00",
+    "last_month_balance": "0.00",
+    "total_amount": "4780.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 59,
+  "fields": {
+    "room": 26,
+    "tenant": 37,
+    "month": "2026-11-01",
+    "rent_amount": "8000.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "1890.00",
+    "last_month_balance": "0.00",
+    "total_amount": "9890.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 60,
+  "fields": {
+    "room": 27,
+    "tenant": 38,
+    "month": "2026-11-01",
+    "rent_amount": "8000.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "1090.00",
+    "last_month_balance": "0.00",
+    "total_amount": "9090.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 61,
+  "fields": {
+    "room": 28,
+    "tenant": 39,
+    "month": "2026-11-01",
+    "rent_amount": "4500.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "10.00",
+    "last_month_balance": "0.00",
+    "total_amount": "4510.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 62,
+  "fields": {
+    "room": 29,
+    "tenant": 40,
+    "month": "2026-11-01",
+    "rent_amount": "4500.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "1070.00",
+    "last_month_balance": "0.00",
+    "total_amount": "5570.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 63,
+  "fields": {
+    "room": 30,
+    "tenant": 41,
+    "month": "2026-11-01",
+    "rent_amount": "6000.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "550.00",
+    "last_month_balance": "0.00",
+    "total_amount": "6550.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 64,
+  "fields": {
+    "room": 31,
+    "tenant": 42,
+    "month": "2026-11-01",
+    "rent_amount": "6000.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "550.00",
+    "last_month_balance": "0.00",
+    "total_amount": "6550.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 65,
+  "fields": {
+    "room": 32,
+    "tenant": 43,
+    "month": "2026-11-01",
+    "rent_amount": "6000.00",
+    "maintenance_charge": "1400.00",
+    "electricity_charge": "640.00",
+    "last_month_balance": "0.00",
+    "total_amount": "8040.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+},
+{
+  "model": "Smartnestapp.rentdetail",
+  "pk": 66,
+  "fields": {
+    "room": 33,
+    "tenant": 44,
+    "month": "2026-11-01",
+    "rent_amount": "6000.00",
+    "maintenance_charge": "0.00",
+    "electricity_charge": "380.00",
+    "last_month_balance": "0.00",
+    "total_amount": "6380.00",
+    "paid_amount": "0.00",
+    "payment_method": "UPI",
+    "collection_date": null,
+    "is_paid": false
+  }
+}
+]
