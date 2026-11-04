@@ -1,0 +1,49 @@
+{% extends 'Smartnestapp/base.html' %}
+{% block content %}
+<div class="row justify-content-center align-items-center" style="min-height: 70vh;">
+    <div class="col-md-5 col-lg-4">
+        <div class="card shadow border-0 rounded-3">
+            <div class="card-header bg-dark text-white text-center py-3">
+                <h4 class="mb-0 fw-bold">🏢 Smartnest</h4>
+                <small class="text-white-50">Property Management Portal</small>
+            </div>
+            <div class="card-body p-4">
+                
+                <!-- Display error alert if login fails -->
+                {% if error_message %}
+                    <div class="alert alert-danger py-2 px-3 small d-flex align-items-center mb-3" role="alert">
+                        <span>⚠️ {{ error_message }}</span>
+                    </div>
+                {% endif %}
+
+                <form method="POST" action="{% url 'login' %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted">USERNAME</label>
+                        <input type="text" 
+                               name="username" 
+                               class="form-control form-control-lg" 
+                               placeholder="Enter username" 
+                               required 
+                               autofocus>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted">PASSWORD</label>
+                        <input type="password" 
+                               name="password" 
+                               class="form-control form-control-lg" 
+                               placeholder="Enter password" 
+                               required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold mt-2 shadow-sm">
+                        🔒 Sign In
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

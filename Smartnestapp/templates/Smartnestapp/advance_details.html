@@ -1,0 +1,162 @@
+{% extends 'Smartnestapp/base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Advance Details</h2>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#recordAdvanceModal">
+        + Record Advance
+    </button>
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+{% endif %}
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover mb-0 align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th style="width: 10%;">Room</th>
+                        <th style="width: 18%;">Tenant</th>
+                        <th style="width: 14%;">Target Advance</th>
+                        <th style="width: 14%;">Paid</th>
+                        <th style="width: 14%;">Pending</th>
+                        <th style="width: 12%;">Payment Date</th>
+                        <th style="width: 10%;">Status</th>
+                        <th style="width: 8%;" class="text-center">Delete</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for adv in advances %}
+                    <tr>
+                        <td class="fw-bold">{{ adv.room.room_number }}</td>
+                        <td>
+                            {% if adv.tenant %}
+                                <span class="fw-semibold">{{ adv.tenant.primary_name }}</span>
+                            {% else %}
+                                <span class="text-muted">Unassigned</span>
+                            {% endif %}
+                        </td>
+                        <td>₹{{ adv.room.target_advance_amount|floatformat:2 }}</td>
+                        <td>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <span class="text-success fw-bold">₹{{ adv.amount_paid|floatformat:2 }}</span>
+                                <span class="badge {% if adv.payment_method == 'CASH' %}bg-info text-dark{% else %}bg-secondary{% endif %} ms-1">
+                                    {{ adv.payment_method|default:'UPI' }}
+                                </span>
+                            </div>
+                        </td>
+                        <td class="text-danger fw-bold">₹{{ adv.balance_pending|floatformat:2 }}</td>
+                        <td>{{ adv.payment_date|date:"d/m/Y" }}</td>
+                        <td>
+                            {% if adv.status == 'paid' %}
+                                <span class="badge bg-success">Paid</span>
+                            {% elif adv.status == 'pending' %}
+                                <span class="badge bg-warning text-dark">Pending</span>
+                            {% else %}
+                                <span class="badge bg-secondary">No Advance</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <form method="POST" action="{% url 'delete_advance' adv.id %}" onsubmit="return confirm('Delete advance record for {{ adv.room.room_number }}?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger">🗑️</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center py-4 text-muted">
+                            No advance records recorded in database.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Record Advance with CASH or UPI -->
+<div class="modal fade" id="recordAdvanceModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Record Advance Payment</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{% url 'advance_details' %}">
+                {% csrf_token %}
+                <input type="hidden" name="record_advance_submit" value="1">
+                
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Select Room</label>
+                        <select name="room_id" id="modal_advance_room" class="form-select" required onchange="updateTargetAdvanceDisplay()">
+                            <option value="">-- Choose Occupied Room --</option>
+                            {% for r in rooms %}
+                                <option value="{{ r.id }}" data-target="{{ r.target_advance_amount }}" data-tenant="{{ r.current_tenant.primary_name|default:'Unassigned' }}">
+                                    Room {{ r.room_number }} ({{ r.building.name }}) - {{ r.current_tenant.primary_name|default:'Vacant' }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="alert alert-light border py-2 mb-3">
+                        <strong>Tenant:</strong> <span id="advance_tenant_name">-</span> | 
+                        <strong>Target Advance:</strong> ₹<span id="advance_target_display">0.00</span>
+                    </div>
+
+                    <!-- Payment Mode: CASH or UPI -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Payment Mode</label>
+                        <div class="d-flex gap-4 p-2 border rounded bg-light">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="payment_method" id="advUPI" value="UPI" checked>
+                                <label class="form-check-label fw-semibold" for="advUPI">UPI</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="payment_method" id="advCash" value="CASH">
+                                <label class="form-check-label fw-semibold" for="advCash">CASH</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Amount Paid (₹)</label>
+                        <input type="number" step="0.01" name="amount_paid" class="form-control form-control-lg text-success fw-bold" placeholder="0.00" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Payment Date</label>
+                        <input type="date" name="payment_date" class="form-control" value="{{ today_date }}">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success px-4">💾 Save Advance</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function updateTargetAdvanceDisplay() {
+    const select = document.getElementById('modal_advance_room');
+    const selectedOption = select.options[select.selectedIndex];
+    const target = selectedOption.getAttribute('data-target') || '0.00';
+    const tenant = selectedOption.getAttribute('data-tenant') || '-';
+
+    document.getElementById('advance_target_display').innerText = parseFloat(target).toFixed(2);
+    document.getElementById('advance_tenant_name').innerText = tenant;
+}
+</script>
+{% endblock %}

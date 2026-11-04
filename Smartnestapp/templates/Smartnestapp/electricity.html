@@ -1,0 +1,55 @@
+{% extends 'Smartnestapp/base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Electricity Charges (₹10 / Unit)</h2>
+    <a href="{% url 'add_electricity' %}" class="btn btn-primary">+ Record Reading</a>
+</div>
+
+{% if messages %}
+    {% for msg in messages %}<div class="alert alert-success">{{ msg }}</div>{% endfor %}
+{% endif %}
+
+{% for b in buildings %}
+<div class="card mb-4 shadow-sm">
+    <div class="card-header bg-secondary text-white">{{ b.name }}</div>
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0 align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Room</th>
+                    <th>Month</th>
+                    <th>Previous</th>
+                    <th>Current</th>
+                    <th>Units</th>
+                    <th>Amount (₹)</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in b.rooms.all %}
+                    {% for log in r.electricity_readings.all %}
+                    <tr>
+                        <td><strong>{{ r.room_number }}</strong></td>
+                        <td>{{ log.month_year|date:"M Y" }}</td>
+                        <td>{{ log.previous_reading }}</td>
+                        <td>{{ log.current_reading }}</td>
+                        <td>{{ log.units_consumed }}</td>
+                        <td class="fw-bold text-success">₹{{ log.total_electricity_amount }}</td>
+                        <td>
+                            <a href="{% url 'edit_electricity' log.id %}" class="btn btn-sm btn-outline-primary">✏️ Edit</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td><strong>{{ r.room_number }}</strong></td>
+                        <td colspan="5" class="text-muted">No meter reading recorded.</td>
+                        <td><a href="{% url 'add_electricity' %}" class="btn btn-sm btn-outline-secondary">+ Add</a></td>
+                    </tr>
+                    {% endfor %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

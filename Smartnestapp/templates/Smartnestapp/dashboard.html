@@ -1,0 +1,190 @@
+{% extends 'Smartnestapp/base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold">Smartnest Dashboard (Total {{ total_rooms }} Rooms)</h2>
+</div>
+
+<!-- Row 1: Primary Room & Rent Metrics -->
+<div class="row g-3 mb-3">
+    <!-- Total Rooms -->
+    <div class="col-md-3 col-sm-6">
+        <div class="card bg-primary text-white shadow-sm border-0 h-100">
+            <div class="card-body p-3">
+                <div class="small fw-semibold opacity-75">Total Rooms</div>
+                <div class="fs-2 fw-bold">{{ total_rooms }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vacant Rooms -->
+    <div class="col-md-3 col-sm-6">
+        <div class="card text-dark shadow-sm border-0 h-100" style="background-color: #ffc107;">
+            <div class="card-body p-3">
+                <div class="small fw-semibold opacity-75">Vacant Rooms</div>
+                <div class="fs-2 fw-bold">{{ vacant_rooms }} / {{ total_rooms }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total Rent -->
+    <div class="col-md-3 col-sm-6">
+        <div class="card bg-dark text-white shadow-sm border-0 h-100">
+            <div class="card-body p-3">
+                <div class="small fw-semibold opacity-75">Total Rent</div>
+                <div class="fs-2 fw-bold">₹{{ total_rent|floatformat:2 }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Rent -->
+    <div class="col-md-3 col-sm-6">
+        <div class="card bg-danger text-white shadow-sm border-0 h-100">
+            <div class="card-body p-3">
+                <div class="small fw-semibold opacity-75">Pending Rent</div>
+                <div class="fs-2 fw-bold">₹{{ pending_rent|floatformat:2 }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Row 2: Advance Breakdown (Total, Cash, UPI) -->
+<div class="row g-3 mb-3">
+    <!-- Total Advance -->
+    <div class="col-md-4 col-sm-12">
+        <div class="card bg-info text-dark shadow-sm border-0 h-100">
+            <div class="card-body p-3">
+                <div class="small fw-semibold opacity-75">Total Advance</div>
+                <div class="fs-2 fw-bold">₹{{ total_advance|floatformat:2 }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total Cash Advance -->
+    <div class="col-md-4 col-sm-6">
+        <div class="card bg-secondary text-white shadow-sm border-0 h-100">
+            <div class="card-body p-3">
+                <div class="small fw-semibold opacity-75">Total Cash Advance</div>
+                <div class="fs-2 fw-bold">₹{{ cash_advance|floatformat:2 }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total UPI Advance -->
+    <div class="col-md-4 col-sm-6">
+        <div class="card bg-secondary text-white shadow-sm border-0 h-100">
+            <div class="card-body p-3">
+                <div class="small fw-semibold opacity-75">Total UPI Advance</div>
+                <div class="fs-2 fw-bold">₹{{ upi_advance|floatformat:2 }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Row 3: Rent Collected (Cash, UPI) & Electricity Units -->
+<div class="row g-3 mb-4">
+    <!-- Total Cash Rent Collected -->
+    <div class="col-md-3 col-sm-6">
+        <div class="card bg-success text-white shadow-sm border-0 h-100">
+            <div class="card-body p-3">
+                <div class="small fw-semibold opacity-75">Cash Rent Collected</div>
+                <div class="fs-2 fw-bold">₹{{ cash_rent_collected|floatformat:2 }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total UPI Rent Collected -->
+    <div class="col-md-3 col-sm-6">
+        <div class="card bg-success text-white shadow-sm border-0 h-100">
+            <div class="card-body p-3">
+                <div class="small fw-semibold opacity-75">UPI Rent Collected</div>
+                <div class="fs-2 fw-bold">₹{{ upi_rent_collected|floatformat:2 }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Building-1 Total Electricity Units -->
+    <div class="col-md-3 col-sm-6">
+        <div class="card border border-primary shadow-sm h-100">
+            <div class="card-body p-3">
+                <div class="small fw-bold text-primary">Building-1 EB Units</div>
+                <div class="fs-2 fw-bold text-dark">{{ b1_total_units|floatformat:2 }} <span class="fs-6 fw-normal text-muted">units</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Building-2 Total Electricity Units -->
+    <div class="col-md-3 col-sm-6">
+        <div class="card border border-primary shadow-sm h-100">
+            <div class="card-body p-3">
+                <div class="small fw-bold text-primary">Building-2 EB Units</div>
+                <div class="fs-2 fw-bold text-dark">{{ b2_total_units|floatformat:2 }} <span class="fs-6 fw-normal text-muted">units</span></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Rental Due & Payment Reminders in dashboard.html -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-dark text-white py-3">
+        <h5 class="mb-0">Rental Due & Payment Reminders</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover mb-0 align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 8%;">Room</th>
+                        <th style="width: 14%;">Building</th>
+                        <th style="width: 18%;">Tenant</th>
+                        <th style="width: 14%;">Total Billed</th>
+                        <th style="width: 16%;">Paid (Collected)</th>
+                        <th style="width: 15%;">Pending Balance</th>
+                        <th style="width: 15%;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in overdue_reminders %}
+                    <tr>
+                        <td class="fw-bold">{{ item.room.room_number }}</td>
+                        <td>{{ item.room.building.name }}</td>
+                        <td>{{ item.tenant.primary_name|default:"Unassigned" }}</td>
+                        <td>₹{{ item.total_amount|floatformat:2 }}</td>
+                        
+                        <!-- Paid with UPI/CASH Badge -->
+                        <td>
+                            <span class="text-success fw-bold">₹{{ item.paid_amount|floatformat:2 }}</span>
+                            {% if item.paid_amount > 0 %}
+                                <span class="badge {% if item.payment_method == 'CASH' %}bg-info text-dark{% else %}bg-secondary{% endif %} ms-1" style="font-size: 0.72rem;">
+                                    {{ item.payment_method|default:'UPI' }}
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Corrected Pending Balance: Total Billed - Paid -->
+                        <td class="text-danger fw-bold">
+                            ₹{{ item.current_balance_due|floatformat:2 }}
+                        </td>
+
+                        <td>
+                            {% if item.is_paid %}
+                                <span class="badge bg-success">Paid</span>
+                            {% elif item.paid_amount > 0 %}
+                                <span class="badge bg-warning text-dark">Partially Paid</span>
+                            {% else %}
+                                <span class="badge bg-danger">Pending</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">
+                            No overdue or pending rental payments for this billing cycle.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

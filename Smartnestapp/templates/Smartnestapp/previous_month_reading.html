@@ -1,0 +1,96 @@
+{% extends 'Smartnestapp/base.html' %}
+{% block content %}
+<div class="d-flex justify-content-end gap-2 mb-3">
+    <!-- Save baseline button -->
+    <button type="submit" name="action" value="save_previous" class="btn btn-secondary">
+        💾 Save Previous Readings
+    </button>
+</div>
+{% if messages %}
+    {% for msg in messages %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ msg }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+{% endif %}
+
+<form method="POST" action="{% url 'previous_month_reading' %}">
+    {% csrf_token %}
+
+    <div class="card p-3 mb-4 shadow-sm bg-light border-0">
+        <div class="d-flex justify-content-between align-items-center">
+            <span class="text-muted fw-semibold">Baseline Previous Month Meter Readings:</span>
+            <button type="submit" class="btn btn-secondary px-4 fw-bold shadow-sm">
+                💾 Save Previous Readings to Database
+            </button>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Building-1: 25 Rooms (A, B, C side-by-side) -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm border">
+                <div class="card-header bg-secondary text-white fw-bold">Building-1 (25 Rooms)</div>
+                <div class="table-responsive">
+                    <table class="table table-bordered mb-0 align-middle">
+                        <tbody>
+                            {% for row in b1_rows %}
+                            <tr>
+                                <td class="p-2" style="width: 33.33%;">
+                                    {% if row.a %}
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span class="fw-bold fs-5 me-2" style="min-width: 45px;">{{ row.a.room_number }}</span>
+                                        <input type="number" step="0.01" name="prev_{{ row.a.id }}" class="form-control form-control-lg text-end fw-bold text-muted" value="{{ row.a.previous_reading|floatformat:0 }}">
+                                    </div>
+                                    {% endif %}
+                                </td>
+                                <td class="p-2" style="width: 33.33%;">
+                                    {% if row.b %}
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span class="fw-bold fs-5 me-2" style="min-width: 45px;">{{ row.b.room_number }}</span>
+                                        <input type="number" step="0.01" name="prev_{{ row.b.id }}" class="form-control form-control-lg text-end fw-bold text-muted" value="{{ row.b.previous_reading|floatformat:0 }}">
+                                    </div>
+                                    {% endif %}
+                                </td>
+                                <td class="p-2" style="width: 33.33%;">
+                                    {% if row.c %}
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span class="fw-bold fs-5 me-2" style="min-width: 45px;">{{ row.c.room_number }}</span>
+                                        <input type="number" step="0.01" name="prev_{{ row.c.id }}" class="form-control form-control-lg text-end fw-bold text-muted" value="{{ row.c.previous_reading|floatformat:0 }}">
+                                    </div>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Building-2: 8 Rooms -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm border">
+                <div class="card-header bg-secondary text-white fw-bold">8 house (Building-2)</div>
+                <div class="table-responsive">
+                    <table class="table table-bordered mb-0 align-middle">
+                        <tbody>
+                            {% for r in b2_rooms %}
+                            <tr>
+                                <td class="p-2">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span class="fw-bold fs-5 me-2" style="min-width: 50px;">{{ r.room_number }}</span>
+                                        <input type="number" step="0.01" name="prev_{{ r.id }}" class="form-control form-control-lg text-end fw-bold text-muted" value="{{ r.previous_reading|floatformat:0 }}">
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}

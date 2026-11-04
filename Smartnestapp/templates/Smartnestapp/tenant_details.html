@@ -1,0 +1,104 @@
+{% extends 'Smartnestapp/base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Tenant Directory</h2>
+    <a href="{% url 'add_tenant' %}" class="btn btn-primary fw-semibold">+ Add New Tenant</a>
+</div>
+
+{% if messages %}
+    {% for msg in messages %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ msg }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+{% endif %}
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th style="width: 24%;">Room</th>
+                        <th style="width: 14%;">Primary Tenant</th>
+                        <th style="width: 12%;">Phone</th>
+                        <th style="width: 20%;">Members Names</th>
+                        <th style="width: 6%;" class="text-center">Count</th>
+                        <th style="width: 10%;" class="text-center">Status</th>
+                        <th style="width: 7%;" class="text-center">Action</th>
+                        <th style="width: 7%;" class="text-center">Delete</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in tenants %}
+                    <tr>
+                        <td>{{ t.room }}</td>
+                        <td><strong>{{ t.primary_name }}</strong></td>
+                        <td>{{ t.phone_number }}</td>
+                        <td>{{ t.members_names|default:"None" }}</td>
+                        <td class="text-center">
+                            <span class="badge bg-info text-dark rounded-pill px-2">{{ t.total_members_count }}</span>
+                        </td>
+                        <td class="text-center">
+                            {% if t.is_active %}
+                                <span class="badge bg-success px-2 py-1">Active</span>
+                            {% else %}
+                                <span class="badge bg-secondary px-2 py-1">Moved Out</span>
+                            {% endif %}
+                        </td>
+                        <!-- Existing Edit Button -->
+                        <td class="text-center">
+                            <a href="{% url 'edit_tenant' t.id %}" class="btn btn-sm btn-outline-primary px-2">
+                                ✏️ Edit
+                            </a>
+                        </td>
+                        <!-- New Dedicated Delete Column with Confirmation Modal -->
+                        <td class="text-center">
+                            <button type="button" class="btn btn-sm btn-outline-danger px-2" data-bs-toggle="modal" data-bs-target="#deleteModal_{{ t.id }}" title="Delete from Database">
+                                🗑️ Delete
+                            </button>
+                        </td>
+                    </tr>
+
+                    <!-- Delete Confirmation Modal for each tenant -->
+                    <div class="modal fade" id="deleteModal_{{ t.id }}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header bg-danger text-white">
+                                    <h5 class="modal-title">Confirm Deletion</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body text-start">
+                                    <p class="mb-2">Are you sure you want to delete this tenant permanently?</p>
+                                    <ul class="list-group mb-3">
+                                        <li class="list-group-item"><strong>Name:</strong> {{ t.primary_name }}</li>
+                                        <li class="list-group-item"><strong>Room:</strong> {{ t.room }}</li>
+                                        <li class="list-group-item"><strong>Phone:</strong> {{ t.phone_number }}</li>
+                                    </ul>
+                                    <small class="text-danger">⚠️ This will remove the record directly from your database.</small>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <form method="POST" action="{% url 'delete_tenant' t.id %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger px-3">Yes, Delete</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center py-4 text-muted">No tenants recorded in database.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

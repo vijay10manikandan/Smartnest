@@ -1,0 +1,106 @@
+{% extends 'Smartnestapp/base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="fw-bold mb-0 text-dark">{{ current_date }}</h1>
+    <span class="badge bg-primary fs-6">Current Month Meter Readings</span>
+</div>
+
+{% if messages %}
+    {% for msg in messages %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ msg }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+{% endif %}
+
+<form method="POST" action="{% url 'current_month_reading' %}">
+    {% csrf_token %}
+
+    <div class="card p-3 mb-4 shadow-sm bg-light border-0">
+        <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center">
+            <span class="text-muted fw-semibold">Enter active readings (Rate: ₹10/unit auto-linked):</span>
+            <div class="d-flex gap-2">
+                <button type="submit" name="action" value="save_readings" class="btn btn-success px-4 fw-bold shadow-sm">
+                    💾 Save to Database
+                </button>
+                <button type="submit" name="action" value="save_to_previous" class="btn btn-primary px-3 fw-bold shadow-sm" onclick="return confirm('Copy all Current Readings into Previous Month and reset Current to 0?');">
+                    🔄 Save to Previous Month
+                </button>
+                <button type="submit" name="action" value="clear_current" class="btn btn-outline-danger px-3 fw-bold" onclick="return confirm('Clear all Current Month readings to 0?');">
+                    🧹 Clear All Current
+                </button>
+                <button type="submit" name="action" value="final_submit" class="btn btn-warning fw-bold text-dark" onclick="return confirm('Finalize meter readings and update rent records?');">
+                    🚀 Final Submit to Electricity & Rent
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Building-1: 25 Rooms (A, B, C side-by-side) -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm border">
+                <div class="card-header bg-dark text-white fw-bold">Building-1 (25 Rooms)</div>
+                <div class="table-responsive">
+                    <table class="table table-bordered mb-0 align-middle">
+                        <tbody>
+                            {% for row in b1_rows %}
+                            <tr>
+                                <td class="p-2" style="width: 33.33%;">
+                                    {% if row.a %}
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span class="fw-bold fs-5 me-2" style="min-width: 45px;">{{ row.a.room_number }}</span>
+                                        <input type="number" step="0.01" name="curr_{{ row.a.id }}" class="form-control form-control-lg text-end fw-bold text-primary" value="{{ row.a.current_reading|floatformat:0 }}">
+                                    </div>
+                                    {% endif %}
+                                </td>
+                                <td class="p-2" style="width: 33.33%;">
+                                    {% if row.b %}
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span class="fw-bold fs-5 me-2" style="min-width: 45px;">{{ row.b.room_number }}</span>
+                                        <input type="number" step="0.01" name="curr_{{ row.b.id }}" class="form-control form-control-lg text-end fw-bold text-primary" value="{{ row.b.current_reading|floatformat:0 }}">
+                                    </div>
+                                    {% endif %}
+                                </td>
+                                <td class="p-2" style="width: 33.33%;">
+                                    {% if row.c %}
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span class="fw-bold fs-5 me-2" style="min-width: 45px;">{{ row.c.room_number }}</span>
+                                        <input type="number" step="0.01" name="curr_{{ row.c.id }}" class="form-control form-control-lg text-end fw-bold text-primary" value="{{ row.c.current_reading|floatformat:0 }}">
+                                    </div>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Building-2: 8 Rooms -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm border">
+                <div class="card-header bg-dark text-white fw-bold">8 house (Building-2)</div>
+                <div class="table-responsive">
+                    <table class="table table-bordered mb-0 align-middle">
+                        <tbody>
+                            {% for r in b2_rooms %}
+                            <tr>
+                                <td class="p-2">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span class="fw-bold fs-5 me-2" style="min-width: 50px;">{{ r.room_number }}</span>
+                                        <input type="number" step="0.01" name="curr_{{ r.id }}" class="form-control form-control-lg text-end fw-bold text-primary" value="{{ r.current_reading|floatformat:0 }}">
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}

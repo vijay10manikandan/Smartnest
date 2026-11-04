@@ -1,0 +1,69 @@
+{% extends 'Smartnestapp/base.html' %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Update Rent - {{ rent_record.room }}</h5>
+                <span class="badge bg-light text-dark">{{ rent_record.billing_month|date:"F Y" }}</span>
+            </div>
+            <div class="card-body p-4">
+                <div class="alert alert-info py-2">
+                    <strong>Tenant:</strong> {{ rent_record.tenant.primary_name|default:"Vacant" }} |
+                    <strong>Contact:</strong> {{ rent_record.tenant.phone_number|default:"-" }}
+                </div>
+
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Base Rent (₹)</label>
+                            {{ form.rent_amount }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Electricity Charges (₹)</label>
+                            {{ form.electricity_charges }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Maintenance Charges (₹)</label>
+                            {{ form.maintenance_charges }}
+                        </div>
+
+                        <div class="col-md-12"><hr class="my-2"></div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-success">Rent Collected / Amount Paid (₹)</label>
+                            {{ form.amount_paid }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Collection Date</label>
+                            {{ form.collection_date }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-danger">Next Due / Reminder Date</label>
+                            {{ form.next_due_date }}
+                        </div>
+                    </div>
+
+                    <div class="card bg-light p-3 mt-4 border">
+                        <div class="d-flex justify-content-between">
+                            <span>Current Total Bill:</span>
+                            <strong class="fs-5">₹{{ rent_record.total_bill }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between text-danger">
+                            <span>Current Pending:</span>
+                            <strong class="fs-5">₹{{ rent_record.balance_pending }}</strong>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 d-flex justify-content-between">
+                        <a href="{% url 'rent_details' %}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-success px-4">💾 Save to Database</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

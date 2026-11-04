@@ -1,0 +1,252 @@
+{% extends 'Smartnestapp/base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Room Management & Default Rent</h2>
+    <span class="badge bg-secondary fs-6">Total: 33 Rooms</span>
+</div>
+
+{% if messages %}
+    {% for msg in messages %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ msg }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+{% endif %}
+
+{% for entry in structured_data %}
+<div class="card mb-5 shadow-sm border-0">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3">
+        <h4 class="mb-0">{{ entry.building.name }}</h4>
+        <span class="badge bg-light text-dark">{{ entry.building.total_rooms_count }} Rooms</span>
+    </div>
+    <div class="card-body p-4">
+        {% for floor_name, rooms in entry.floors.items %}
+            <div class="d-flex align-items-center mt-3 mb-2">
+                <h5 class="text-primary mb-0 me-2">🏢 {{ floor_name }}</h5>
+                <span class="badge bg-light text-secondary border">({{ rooms|length }} Rooms)</span>
+            </div>
+            
+            <div class="table-responsive mb-4">
+                <table class="table table-bordered table-hover align-middle">
+                    <thead class="table-light text-center">
+                        <tr>
+                            <th style="width: 10%;">Room No</th>
+                            <th style="width: 20%;">Current Tenant</th>
+                            <th style="width: 15%;">Default / Active Rent (₹)</th>
+                            <th style="width: 15%;">Maintenance (₹)</th>
+                            <th style="width: 15%;">Target Advance (₹)</th>
+                            <th style="width: 12%;">Status</th>
+                            <th style="width: 13%;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for room in rooms %}
+                        <tr>
+                            <td class="text-center fw-bold">{{ room.room_number }}</td>
+                            <td>
+                                {% if room.current_tenant %}
+                                    <span class="fw-semibold">{{ room.current_tenant.primary_name }}</span>
+                                    <small class="text-muted d-block">{{ room.current_tenant.phone_number }}</small>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark">Vacant</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end fw-bold text-success">₹{{ room.monthly_rent }}</td>
+                            <td class="text-end">
+                                ₹{{ room.maintenance_charges }}
+                                <small class="text-muted d-block" style="font-size: 0.75rem;">
+                                    {% if room.maintenance_type == 'PER_MEMBER' %}
+                                        (Per Member)
+                                    {% else %}
+                                        (Per Room)
+                                    {% endif %}
+                                </small>
+                            </td>
+                            <td class="text-end">₹{{ room.target_advance_amount }}</td>
+                            <td class="text-center">
+                                {% if room.is_vacant %}
+                                    <span class="badge bg-secondary">Vacant</span>
+                                {% else %}
+                                    <span class="badge bg-primary">Occupied</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <button type="button" 
+                                        class="btn btn-sm btn-outline-primary px-3 modify-btn"
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#modifyRoomModal"
+                                        data-id="{{ room.id }}"
+                                        data-room="{{ room.room_number }}"
+                                        data-building="{{ room.building.name }}"
+                                        data-floor="{{ room.floor }}"
+                                        data-rent="{{ room.monthly_rent }}"
+                                        data-maint-type="{{ room.maintenance_type|default:'PER_ROOM' }}"
+                                        data-maint-amount="{{ room.maintenance_charges|default:'500.00' }}"
+                                        data-rate-member="{{ room.maintenance_rate_per_member|default:'250.00' }}"
+                                        data-tenant-count="{{ room.get_tenant_member_count }}"
+                                        data-advance="{{ room.target_advance_amount }}"
+                                        data-vacant="{{ room.is_vacant|yesno:'true,false' }}">
+                                    ✏️ Modify
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endfor %}
+
+<!-- Central Modal Dialog -->
+<div class="modal fade" id="modifyRoomModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="modifyModalLabel">Modify Room</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{% url 'room_details' %}">
+                {% csrf_token %}
+                <input type="hidden" name="modify_room_rent" value="1">
+                <input type="hidden" name="room_id" id="modal_room_id">
+                
+                <div class="modal-body text-start">
+                    <div class="alert alert-light border py-2 mb-3">
+                        <strong>Building:</strong> <span id="info_building"></span> | 
+                        <strong>Floor:</strong> <span id="info_floor"></span>
+                    </div>
+
+                    <!-- Monthly Rent -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Monthly Rent (₹)</label>
+                        <input type="number" step="0.01" name="monthly_rent" id="modal_monthly_rent" class="form-control" required>
+                        <small class="text-muted">Change this to override the default rent.</small>
+                    </div>
+
+                    <!-- Maintenance Charges -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Maintenance Charges (₹)</label>
+                        <div class="d-flex gap-4 p-2 border rounded bg-light mb-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="maintenance_type" id="typePerRoom" value="PER_ROOM" onchange="toggleMaintenanceUI()">
+                                <label class="form-check-label fw-semibold" for="typePerRoom">Per Room</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="maintenance_type" id="typePerMember" value="PER_MEMBER" onchange="toggleMaintenanceUI()">
+                                <label class="form-check-label fw-semibold" for="typePerMember">Per Member</label>
+                            </div>
+                        </div>
+
+                        <!-- Option 2: Per Room Input -->
+                        <div id="wrapper_per_room">
+                            <input type="number" step="0.01" name="maintenance_fixed_amount" id="modal_fixed_amount" class="form-control" value="500.00">
+                        </div>
+
+                        <!-- Option 1: Per Member Input -->
+                        <div id="wrapper_per_member" style="display: none;">
+                            <div class="row g-2 mb-2">
+                                <div class="col-6">
+                                    <label class="form-label small text-muted">Members Count (from Tenant tab)</label>
+                                    <input type="number" min="1" name="member_count" id="modal_member_count" class="form-control" oninput="calculateMaintenance()">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small text-muted">Rate / Member (₹)</label>
+                                    <input type="number" step="0.01" name="maintenance_rate_per_member" id="modal_member_rate" class="form-control" value="250.00" oninput="calculateMaintenance()">
+                                </div>
+                            </div>
+                            <div class="alert alert-info py-2 px-3 small mb-0">
+                                Computed Maintenance: <strong>₹<span id="modal_computed_display">250.00</span></strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Target Advance -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Target Advance (₹)</label>
+                        <input type="number" step="0.01" name="target_advance_amount" id="modal_target_advance" class="form-control" required>
+                    </div>
+
+                    <!-- Mark as Vacant -->
+                    <div class="mb-3">
+                        <div class="form-check form-switch mt-2">
+                            <input class="form-check-input" type="checkbox" name="is_vacant" id="modal_is_vacant">
+                            <label class="form-check-label fw-bold" for="modal_is_vacant">Mark as Vacant Room</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success px-4">💾 Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const modifyModal = document.getElementById('modifyRoomModal');
+    
+    // Listen for Bootstrap modal show trigger
+    modifyModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        
+        // Extract data-* attributes
+        const id = button.getAttribute('data-id');
+        const room = button.getAttribute('data-room');
+        const building = button.getAttribute('data-building');
+        const floor = button.getAttribute('data-floor');
+        const rent = button.getAttribute('data-rent');
+        const maintType = button.getAttribute('data-maint-type');
+        const maintAmount = button.getAttribute('data-maint-amount');
+        const rateMember = button.getAttribute('data-rate-member');
+        const tenantCount = button.getAttribute('data-tenant-count');
+        const advance = button.getAttribute('data-advance');
+        const isVacant = button.getAttribute('data-vacant');
+
+        // Populate fields
+        document.getElementById('modal_room_id').value = id;
+        document.getElementById('modifyModalLabel').innerText = `Modify Room ${room} (${floor})`;
+        document.getElementById('info_building').innerText = building;
+        document.getElementById('info_floor').innerText = floor;
+        document.getElementById('modal_monthly_rent').value = rent;
+        document.getElementById('modal_target_advance').value = advance;
+        document.getElementById('modal_is_vacant').checked = (isVacant === 'true');
+
+        document.getElementById('modal_fixed_amount').value = maintAmount || '500.00';
+        document.getElementById('modal_member_count').value = tenantCount || 1;
+        document.getElementById('modal_member_rate').value = rateMember || '250.00';
+
+        if (maintType === 'PER_MEMBER') {
+            document.getElementById('typePerMember').checked = true;
+        } else {
+            document.getElementById('typePerRoom').checked = true;
+        }
+
+        toggleMaintenanceUI();
+        calculateMaintenance();
+    });
+});
+
+function toggleMaintenanceUI() {
+    const isPerMember = document.getElementById('typePerMember').checked;
+    document.getElementById('wrapper_per_room').style.display = isPerMember ? 'none' : 'block';
+    document.getElementById('wrapper_per_member').style.display = isPerMember ? 'block' : 'none';
+    if (isPerMember) {
+        calculateMaintenance();
+    }
+}
+
+function calculateMaintenance() {
+    const count = parseFloat(document.getElementById('modal_member_count').value) || 0;
+    const rate = parseFloat(document.getElementById('modal_member_rate').value) || 0;
+    document.getElementById('modal_computed_display').innerText = (count * rate).toFixed(2);
+}
+</script>
+{% endblock %}
