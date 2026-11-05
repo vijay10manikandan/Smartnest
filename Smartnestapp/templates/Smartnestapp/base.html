@@ -4,24 +4,96 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smartnest</title>
+    
+    <!-- Mobile Standalone App (PWA) Meta Tags -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Smartnest">
+    <meta name="theme-color" content="#212529">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/609/609803.png">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background-color: #f8f9fa; }
         .sidebar { min-height: 100vh; background-color: #212529; }
-        .sidebar a, .sidebar button { color: #adb5bd; text-decoration: none; padding: 12px 20px; display: block; font-weight: 500; border: none; background: transparent; width: 100%; text-align: left; }
-        .sidebar a:hover, .sidebar button:hover { color: #fff; background-color: #343a40; }
-        .sidebar .logout-btn:hover { color: #ff6b6b !important; }
+        .sidebar a, .sidebar button, .offcanvas-body a, .offcanvas-body button { 
+            color: #adb5bd; 
+            text-decoration: none; 
+            padding: 12px 20px; 
+            display: block; 
+            font-weight: 500; 
+            border: none; 
+            background: transparent; 
+            width: 100%; 
+            text-align: left; 
+        }
+        .sidebar a:hover, .sidebar button:hover, .offcanvas-body a:hover, .offcanvas-body button:hover { 
+            color: #fff; 
+            background-color: #343a40; 
+        }
+        .logout-btn:hover { color: #ff6b6b !important; }
     </style>
 </head>
 <body>
+
+<!-- Mobile Header Bar (Visible ONLY on Mobile & Tablet screens) -->
+<nav class="navbar navbar-dark bg-dark d-md-none px-3 sticky-top shadow-sm">
+    <div class="container-fluid p-0">
+        <a class="navbar-brand fw-bold mb-0" href="{% url 'dashboard' %}">🏠 SmartNest</a>
+        {% if user.is_authenticated %}
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu" aria-controls="mobileMenu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        {% endif %}
+    </div>
+</nav>
+
+<!-- Mobile Offcanvas Drawer (Slides out from left when hamburger button is tapped) -->
+<div class="offcanvas offcanvas-start bg-dark text-white d-md-none" tabindex="-1" id="mobileMenu" aria-labelledby="mobileMenuLabel">
+    <div class="offcanvas-header border-bottom border-secondary">
+        <h5 class="offcanvas-title fw-bold" id="mobileMenuLabel">🏠 SmartNest</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body p-0 d-flex flex-column">
+        {% if user.is_authenticated %}
+            <a href="{% url 'dashboard' %}">📊 Dashboard</a>
+            <a href="{% url 'room_details' %}">🚪 Room Details</a>
+            <a href="{% url 'rent_details' %}">💰 Rent Details</a>
+            <a href="{% url 'advance_details' %}">💳 Advance Details</a>
+            <a href="{% url 'previous_month_reading' %}">🕒 Previous Month Reading</a>
+            <a href="{% url 'current_month_reading' %}">⚡ Current Month Reading</a>
+            <a href="{% url 'electricity' %}">⚡ Electricity</a>
+            <a href="{% url 'tenant_details' %}">👥 Tenant Details</a>
+            <hr class="text-secondary my-2">
+            <a href="/admin/" target="_blank">⚙️ Admin Panel</a>
+
+            <div class="mt-auto pt-3 border-top border-secondary">
+                <div class="px-3 py-1 text-light small opacity-75">
+                    👤 Logged in as: <strong>{{ user.username }}</strong>
+                </div>
+                <form method="POST" action="{% url 'logout' %}" class="m-0 p-0">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-btn">
+                        🚪 Logout
+                    </button>
+                </form>
+            </div>
+        {% else %}
+            <div class="px-3 py-2 text-secondary text-center small">
+                🔒 Please log in to view tabs.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
 <div class="container-fluid">
     <div class="row">
-        <!-- Sidebar Navigation -->
+        <!-- Desktop Sidebar (Hidden on Mobile screens, visible on md and up) -->
         <nav class="col-md-2 d-none d-md-block sidebar py-3 d-flex flex-column">
             <h4 class="text-white text-center mb-4">🏠 SmartNest</h4>
 
             {% if user.is_authenticated %}
-                <!-- All Navigation Tabs Shown ONLY When Logged In -->
                 <a href="{% url 'dashboard' %}">📊 Dashboard</a>
                 <a href="{% url 'room_details' %}">🚪 Room Details</a>
                 <a href="{% url 'rent_details' %}">💰 Rent Details</a>
@@ -33,7 +105,6 @@
                 <hr class="text-secondary">
                 <a href="/admin/" target="_blank">⚙️ Admin Panel</a>
 
-                <!-- User Info & Logout Button at the bottom -->
                 <div class="mt-auto pt-3 border-top border-secondary">
                     <div class="px-3 py-1 text-light small opacity-75">
                         👤 Logged in as: <strong>{{ user.username }}</strong>
@@ -46,7 +117,6 @@
                     </form>
                 </div>
             {% else %}
-                <!-- Shown when Logged Out -->
                 <div class="px-3 py-2 text-secondary text-center small">
                     🔒 Please log in to view tabs.
                 </div>
@@ -54,7 +124,7 @@
         </nav>
 
         <!-- Main Content Area -->
-        <main class="col-md-10 ms-sm-auto px-md-4 py-4">
+        <main class="col-md-10 ms-sm-auto px-md-4 py-3">
             {% block content %}{% endblock %}
         </main>
     </div>
