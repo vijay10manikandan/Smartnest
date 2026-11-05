@@ -4,7 +4,7 @@ import urllib.parse
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.db.models import Sum
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -881,3 +881,32 @@ def custom_login_view(request):
 def custom_logout_view(request):
     logout(request)
     return redirect('login')
+def pwa_manifest(request):
+    manifest_data = {
+        "name": "SmartNest",
+        "short_name": "SmartNest",
+        "start_url": "/",
+        "display": "standalone",
+        "background_color": "#212529",
+        "theme_color": "#212529",
+        "orientation": "portrait",
+        "icons": [
+            {
+                "src": "https://cdn-icons-png.flaticon.com/512/609/609803.png",
+                "sizes": "192x192",
+                "type": "image/png",
+                "purpose": "any maskable"
+            },
+            {
+                "src": "https://cdn-icons-png.flaticon.com/512/609/609803.png",
+                "sizes": "512x512",
+                "type": "image/png",
+                "purpose": "any maskable"
+            }
+        ]
+    }
+    return JsonResponse(manifest_data, content_type="application/manifest+json")
+
+def pwa_sw(request):
+    sw_code = "self.addEventListener('install', e => self.skipWaiting()); self.addEventListener('activate', e => clients.claim()); self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));"
+    return HttpResponse(sw_code, content_type="application/javascript")
