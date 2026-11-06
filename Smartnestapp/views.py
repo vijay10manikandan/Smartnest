@@ -294,30 +294,61 @@ def extract_numeric_by_keywords(instance, keywords):
 
 def get_room_maint_value(room):
     """
-    Auto-detects maintenance across Room fields, Building fields,
-    and attached Tenant fields.
+    Computes maintenance matching Room Details:
+    - If 'Per Member' is chosen: total_persons * rate
+    - If 'Per Room' is chosen: fixed rate
     """
-    # 1. Check Room fields (matches 'maintenance', 'maint_cost', 'monthly_maintenance', etc.)
-    val = extract_numeric_by_keywords(room, ['maint'])
-    if val > Decimal('0.00'):
-        return val
-
-    # 2. Check Building fields (if maintenance is defined per building)
-    if getattr(room, 'building', None):
-        val = extract_numeric_by_keywords(room.building, ['maint'])
-        if val > Decimal('0.00'):
+    if hasattr(room, 'calculate_maintenance') and callable(room.calculate_maintenance):
+        val = room.calculate_maintenance()
+        if val is not None and val > Decimal('0.00'):
             return val
 
-    # 3. Check helper method if defined in models
-    try:
-        from .models import get_room_maintenance_breakdown
-        res = get_room_maintenance_breakdown(room)
-        if res:
-            return Decimal(str(res[0] if isinstance(res, (tuple, list)) else res))
-    except Exception:
-        pass
+    # Direct attribute inspection if fields have custom names
+    rate = Decimal('0.00')
+    for rate_attr in ['maintenance_rate', 'maintenance_charge', 'maintenance_amount', 'maintenance']:
+        val = getattr(room, rate_attr, None)
+        if val is not None and str(val).strip() != '':
+            try:
+                rate = Decimal(str(val))
+                if rate > Decimal('0.00'):
+                    break
+            except Exception:
+                pass
 
-    return Decimal('0.00')
+    # Detect per-member vs per-room toggle
+    mode = ''
+    for type_attr in ['maintenance_type', 'maintenance_mode', 'maint_type', 'charge_type']:
+        val = getattr(room, type_attr, None)
+        if val:
+            mode = str(val).strip().upper()
+            break
+
+    # Determine person count
+    persons = 1
+    for count_attr in ['total_persons', 'no_of_persons', 'members_count', 'occupants_count']:
+        val = getattr(room, count_attr, None)
+        if val:
+            try:
+                persons = int(val)
+                break
+            except Exception:
+                pass
+
+    tenant = getattr(room, 'current_tenant', None)
+    if tenant:
+        for t_attr in ['total_members', 'no_of_persons', 'members']:
+            val = getattr(tenant, t_attr, None)
+            if val:
+                try:
+                    persons = int(val)
+                    break
+                except Exception:
+                    pass
+
+    if 'MEMBER' in mode or 'PERSON' in mode:
+        return rate * Decimal(str(persons))
+
+    return rate
 
 
 def get_room_target_advance(room):
@@ -381,7 +412,7 @@ def rent_details_view(request):
         elec_cost = latest_elec.total_electricity_amount if latest_elec else Decimal('0.00')
         maint_cost = get_room_maint_value(r)
 
-        rent_record, _ = RentDetail.objects.get_or_create(
+        rent_record, created = RentDetail.objects.get_or_create(
             room=r,
             month=current_month,
             defaults={
@@ -393,7 +424,7 @@ def rent_details_view(request):
             }
         )
 
-        # Force sync rent and maintenance
+        # Force sync maintenance directly from the room's calculated value
         rent_record.tenant = tenant
         rent_record.rent_amount = getattr(r, 'monthly_rent', Decimal('0.00'))
         rent_record.maintenance_charge = maint_cost
