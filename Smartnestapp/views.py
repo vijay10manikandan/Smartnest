@@ -108,26 +108,22 @@ def dashboard_view(request):
 
     # 3. Cash vs UPI Rent Collections
     cash_rent_collected = RentDetail.objects.filter(
-        month=current_month, payment_method='CASH'
-    ).aggregate(total=Sum('paid_amount'))['total'] or Decimal('0.00')
+        month=current_month
+    ).aggregate(total=Sum('cash_amount'))['total'] or Decimal('0.00')
 
     upi_rent_collected = RentDetail.objects.filter(
-        month=current_month, payment_method='UPI'
-    ).aggregate(total=Sum('paid_amount'))['total'] or Decimal('0.00')
+        month=current_month
+    ).aggregate(total=Sum('upi_amount'))['total'] or Decimal('0.00')
 
-    # 4. Advance Metrics (Total, Cash, UPI)
+    # 4. Advance Metrics (Cash vs UPI)
     adv_aggregates = AdvanceDetail.objects.aggregate(
-        total=Sum('amount_paid')
+        total_adv=Sum('amount_paid'),
+        cash_adv=Sum('cash_amount'),
+        upi_adv=Sum('upi_amount')
     )
-    total_advance = adv_aggregates['total'] or Decimal('0.00')
-
-    cash_advance = AdvanceDetail.objects.filter(
-        payment_method='CASH'
-    ).aggregate(total=Sum('amount_paid'))['total'] or Decimal('0.00')
-
-    upi_advance = AdvanceDetail.objects.filter(
-        payment_method='UPI'
-    ).aggregate(total=Sum('amount_paid'))['total'] or Decimal('0.00')
+    total_advance = adv_aggregates['total_adv'] or Decimal('0.00')
+    cash_advance = adv_aggregates['cash_adv'] or Decimal('0.00')
+    upi_advance = adv_aggregates['upi_adv'] or Decimal('0.00')
 
     # 5. Building Electricity Units (Building-1 and Building-2 for current month)
     b1_readings = ElectricityReading.objects.filter(
@@ -845,7 +841,10 @@ def advance_details_view(request):
         cash_paid = Decimal(str(request.POST.get('cash_amount', '0.00') or 0))
         upi_paid = Decimal(str(request.POST.get('upi_amount', '0.00') or 0))
         paid_date_str = request.POST.get('paid_date')
-        paid_date = date.fromisoformat(paid_date_str) if paid_date_str else today
+        try:
+            paid_date = date.fromisoformat(paid_date_str) if paid_date_str else today
+        except ValueError:
+            paid_date = today
 
         adv = get_object_or_404(AdvanceDetail, id=adv_id)
         adv.cash_amount = cash_paid
@@ -855,7 +854,7 @@ def advance_details_view(request):
         messages.success(request, f"Updated advance for Room {adv.room.room_number}: Paid Cash ₹{cash_paid}, UPI ₹{upi_paid}")
         return redirect('advance_details')
 
-    advances = AdvanceDetail.objects.select_related('room', 'tenant', 'room__building').all()
+    advances = AdvanceDetail.objects.select_related('room', 'tenant', 'room__building').all().order_by('room__room_number')
     return render(request, 'Smartnestapp/advance_details.html', {'advances': advances, 'today': today})
 
 
