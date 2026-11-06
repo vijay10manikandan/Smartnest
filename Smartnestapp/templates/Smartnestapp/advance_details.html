@@ -25,6 +25,7 @@
                             <th>Tenant</th>
                             <th>Agreement Advance</th>
                             <th>Paid Advance</th>
+                            <th>Collected Date</th>
                             <th>Pending Advance</th>
                             <th>Action</th>
                         </tr>
@@ -35,7 +36,7 @@
                             <td><strong>{{ adv.room.room_number }}</strong></td>
                             <td>{{ adv.room.building.name }}</td>
                             <td>{{ adv.tenant.primary_name|default:"Vacant" }}</td>
-                            <td>₹{{ adv.agreement_advance }}</td>
+                            <td class="fw-bold">₹{{ adv.agreement_advance }}</td>
                             <td>
                                 <span class="fw-bold text-success">₹{{ adv.amount_paid }}</span>
                                 {% if adv.payment_method == 'SPLIT' %}
@@ -47,6 +48,14 @@
                                     <span class="badge bg-secondary" style="font-size: 0.68rem;">{{ adv.payment_method }}</span>
                                 {% endif %}
                             </td>
+                            <!-- Dedicated Advance Collected Date column -->
+                            <td>
+                                {% if adv.paid_date %}
+                                    <span class="badge bg-light text-dark border">{{ adv.paid_date|date:"d/m/Y" }}</span>
+                                {% else %}
+                                    <span class="text-muted small">-</span>
+                                {% endif %}
+                            </td>
                             <td><span class="fw-bold text-danger">₹{{ adv.pending_advance }}</span></td>
                             <td>
                                 <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#advModal-{{ adv.id }}">
@@ -56,7 +65,7 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="7" class="text-center text-muted py-3">No advance records found.</td>
+                            <td colspan="8" class="text-center text-muted py-3">No advance records found.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -79,7 +88,9 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p><strong>Agreement Advance:</strong> ₹{{ adv.agreement_advance }}</p>
+                <div class="p-2 mb-3 bg-light rounded border">
+                    Agreement Advance: <strong class="text-primary">₹{{ adv.agreement_advance }}</strong>
+                </div>
                 <div class="row g-2 mb-3">
                     <div class="col-6">
                         <label class="form-label fw-bold text-primary">UPI Paid (₹)</label>
@@ -91,7 +102,7 @@
                     </div>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label fw-bold">Paid Date</label>
+                    <label class="form-label fw-bold">Collected Date</label>
                     <input type="date" name="paid_date" class="form-control" value="{{ adv.paid_date|date:'Y-m-d'|default:today|date:'Y-m-d' }}">
                 </div>
             </div>

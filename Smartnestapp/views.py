@@ -271,7 +271,7 @@ def room_details_view(request):
 
 # Smartnestapp/views.py
 def get_room_maint_value(room):
-    """Safely fetch maintenance directly from Room model fields."""
+    """Dynamically pull maintenance value from whichever field name Room uses."""
     for attr in ['maintenance_charge', 'maintenance_amount', 'maintenance']:
         val = getattr(room, attr, None)
         if val is not None:
@@ -279,7 +279,7 @@ def get_room_maint_value(room):
     return Decimal('0.00')
 
 def get_room_target_advance(room):
-    """Safely fetch Target Advance directly from Room model fields."""
+    """Dynamically pull target advance value from whichever field name Room uses."""
     for attr in ['target_advance', 'agreement_advance', 'advance_amount', 'advance']:
         val = getattr(room, attr, None)
         if val is not None:
@@ -329,7 +329,7 @@ def rent_details_view(request):
         elec_cost = latest_elec.total_electricity_amount if latest_elec else Decimal('0.00')
         maint_cost = get_room_maint_value(r)
 
-        rent_record, created = RentDetail.objects.get_or_create(
+        rent_record, _ = RentDetail.objects.get_or_create(
             room=r,
             month=current_month,
             defaults={
@@ -341,7 +341,8 @@ def rent_details_view(request):
             }
         )
 
-        # Sync maintenance and rent if changed on Room model
+        # Force sync rent and maintenance directly from Room model
+        rent_record.tenant = tenant
         rent_record.rent_amount = getattr(r, 'monthly_rent', Decimal('0.00'))
         rent_record.maintenance_charge = maint_cost
         if rent_record.electricity_charge is None:
@@ -351,11 +352,16 @@ def rent_details_view(request):
         t_name = getattr(tenant, 'primary_name', None) or getattr(tenant, 'name', '')
         t_phone = getattr(tenant, 'phone_number', None) or getattr(tenant, 'phone', '')
 
+        # Date for receipt preview (DD/MM/YYYY)
+        rec_date = rent_record.collection_date or current_month
+        bill_date_str = rec_date.strftime("%d/%m/%Y")
+
         info = {
             'room': r,
             'tenant': tenant,
             'tenant_name': t_name,
             'tenant_phone': t_phone,
+            'bill_date': bill_date_str,
             'rent': rent_record.rent_amount,
             'maintenance': rent_record.maintenance_charge,
             'electricity': rent_record.electricity_charge,
@@ -855,10 +861,8 @@ def advance_details_view(request):
             paid_date = today
 
         adv = get_object_or_404(AdvanceDetail, id=adv_id)
-        # Re-sync agreement advance from room target advance if empty
-        if not adv.agreement_advance or adv.agreement_advance == Decimal('0.00'):
-            adv.agreement_advance = get_room_target_advance(adv.room)
-
+        # Always link and lock agreement_advance to room target advance
+        adv.agreement_advance = get_room_target_advance(adv.room)
         adv.cash_amount = cash_paid
         adv.upi_amount = upi_paid
         adv.paid_date = paid_date
@@ -866,22 +870,21 @@ def advance_details_view(request):
         messages.success(request, f"Updated advance for Room {adv.room.room_number}: Paid Cash ₹{cash_paid}, UPI ₹{upi_paid}")
         return redirect('advance_details')
 
-    # Ensure every room has an AdvanceDetail record synced with Room.target_advance
+    # Force sync all rooms so Agreement Advance matches Room Details target advance
     all_rooms = Room.objects.select_related('building').all()
     for rm in all_rooms:
-        adv_obj, created = AdvanceDetail.objects.get_or_create(
+        target_adv = get_room_target_advance(rm)
+        adv_obj, _ = AdvanceDetail.objects.get_or_create(
             room=rm,
             defaults={
                 'tenant': getattr(rm, 'current_tenant', None),
-                'agreement_advance': get_room_target_advance(rm),
+                'agreement_advance': target_adv,
             }
         )
-        # If agreement_advance is 0.00, sync it from room details target advance
-        target_adv = get_room_target_advance(rm)
-        if (not adv_obj.agreement_advance or adv_obj.agreement_advance == Decimal('0.00')) and target_adv > Decimal('0.00'):
-            adv_obj.agreement_advance = target_adv
-            adv_obj.tenant = getattr(rm, 'current_tenant', None)
-            adv_obj.save()
+        # Unconditionally sync agreement_advance from room details target advance
+        adv_obj.agreement_advance = target_adv
+        adv_obj.tenant = getattr(rm, 'current_tenant', None)
+        adv_obj.save()
 
     advances = AdvanceDetail.objects.select_related('room', 'tenant', 'room__building').all().order_by('room__room_number')
     return render(request, 'Smartnestapp/advance_details.html', {'advances': advances, 'today': today})
@@ -1044,7 +1047,6 @@ def combined_bill_view(request, tenant_id):
     current_month = date.today().replace(day=1)
     tenant = get_object_or_404(Tenant, id=tenant_id)
     
-    # 1. Match all rooms belonging to this tenant by Phone Number (or Name)
     t_phone = getattr(tenant, 'phone_number', '') or getattr(tenant, 'phone', '')
     t_name = getattr(tenant, 'primary_name', '') or getattr(tenant, 'name', '')
 
@@ -1056,19 +1058,16 @@ def combined_bill_view(request, tenant_id):
     if not all_tenant_ids:
         all_tenant_ids = [tenant.id]
 
-    # 2. Fetch all rent records for all rooms owned by this multi-room tenant
     rent_records = RentDetail.objects.filter(
         tenant_id__in=all_tenant_ids,
         month=current_month
     ).select_related('room', 'room__building').order_by('room__room_number')
 
-    # Fallback: if no records match current month, fetch latest available
     if not rent_records.exists():
         rent_records = RentDetail.objects.filter(
             tenant_id__in=all_tenant_ids
         ).select_related('room', 'room__building').order_by('room__room_number')
 
-    # 3. Calculate Consolidated Totals
     total_rent = Decimal('0.00')
     total_maintenance = Decimal('0.00')
     total_electricity = Decimal('0.00')
@@ -1076,10 +1075,13 @@ def combined_bill_view(request, tenant_id):
     total_paid = Decimal('0.00')
     total_upi = Decimal('0.00')
     total_cash = Decimal('0.00')
-    total_pending = Decimal('0.00')
 
-    # 4. Construct WhatsApp multi-room repeating format
-    whatsapp_lines = [f"Tenant Name: {t_name}"]
+    # WhatsApp Statement: Room-wise repeating block without pending balance line
+    bill_date_str = current_month.strftime("%d/%m/%Y")
+    whatsapp_lines = [
+        f"Tenant Name: {t_name}",
+        f"Date: {bill_date_str}"
+    ]
 
     for r in rent_records:
         r_rent = r.rent_amount or Decimal('0.00')
@@ -1087,7 +1089,6 @@ def combined_bill_view(request, tenant_id):
         r_eb = r.electricity_charge or Decimal('0.00')
         r_tot = r.total_amount or Decimal('0.00')
         r_paid = r.paid_amount or Decimal('0.00')
-        r_pend = r.current_balance_due or Decimal('0.00')
 
         total_rent += r_rent
         total_maintenance += r_maint
@@ -1096,19 +1097,15 @@ def combined_bill_view(request, tenant_id):
         total_paid += r_paid
         total_upi += (r.upi_amount or Decimal('0.00'))
         total_cash += (r.cash_amount or Decimal('0.00'))
-        total_pending += r_pend
 
-        # Append room-wise block
         whatsapp_lines.append(f"Room No: {r.room.room_number}")
         whatsapp_lines.append(f"{r.room.room_number} Rent: ₹{r_rent}")
         whatsapp_lines.append(f"Electricity Charges: ₹{r_eb}")
         whatsapp_lines.append(f"Maintenance: ₹{r_maint}")
         whatsapp_lines.append(f"Subtotal: ₹{r_tot}")
 
-    # Append overall totals
     whatsapp_lines.append(f"Total Bill: ₹{grand_total}")
     whatsapp_lines.append(f"Total Paid: ₹{total_paid}")
-    whatsapp_lines.append(f"Pending Balance: ₹{total_pending}")
     whatsapp_lines.append(f"Grand Total: ₹{grand_total}")
 
     whatsapp_text_encoded = urllib.parse.quote("\n".join(whatsapp_lines))
@@ -1117,6 +1114,7 @@ def combined_bill_view(request, tenant_id):
         'tenant': tenant,
         'rent_records': rent_records,
         'billing_month': current_month,
+        'bill_date': bill_date_str,
         'total_rent': total_rent,
         'total_maintenance': total_maintenance,
         'total_electricity': total_electricity,
@@ -1124,7 +1122,6 @@ def combined_bill_view(request, tenant_id):
         'total_paid': total_paid,
         'total_upi': total_upi,
         'total_cash': total_cash,
-        'total_pending': total_pending,
         'whatsapp_text_encoded': whatsapp_text_encoded,
     }
     return render(request, 'Smartnestapp/combined_bill.html', context)

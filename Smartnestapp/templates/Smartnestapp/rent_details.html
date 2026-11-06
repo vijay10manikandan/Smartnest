@@ -54,7 +54,7 @@
                             <td>₹{{ info.rent }}</td>
 
                             <!-- 4. Maintenance -->
-                            <td>₹{{ info.maintenance|default:"0.00" }}</td>
+                            <td>₹{{ info.maintenance }}</td>
 
                             <!-- 5. Electricity with Edit & Nil Buttons -->
                             <td>
@@ -97,18 +97,18 @@
                                 <span class="fw-bold text-danger">₹{{ info.pending }}</span>
                             </td>
 
-                            <!-- 9. Actions (WhatsApp, Eye Preview & Combined Bill) -->
+                            <!-- 9. Actions (WhatsApp with Date in Line 2, No Pending line) -->
                             <td>
                                 <div class="d-flex flex-column gap-1">
                                     <div class="d-flex align-items-center gap-1">
                                         {% if info.tenant_phone %}
-                                        <a href="https://api.whatsapp.com/send?phone=91{{ info.tenant_phone }}&text=Room%20Number:%20{{ info.room.room_number }}%0ATenant%20Name:%20{{ info.tenant_name }}%0ARoom%20Rent:₹{{ info.rent }}%0AMaintenance:₹{{ info.maintenance|default:'0.00' }}%0AElectricity%20Charges:₹{{ info.electricity|default:'0.00' }}%0ATotal%20Bill:₹{{ info.total }}%0ATotal%20Paid:₹{{ info.collected }}%0APaid%20via%20UPI:₹{{ info.upi_amount|default:'0.00' }}%0APaid%20via%20Cash:₹{{ info.cash_amount|default:'0.00' }}%0APending%20Dues:₹{{ info.pending }}" 
+                                        <a href="https://api.whatsapp.com/send?phone=91{{ info.tenant_phone }}&text=Room%20Number:%20{{ info.room.room_number }}%0ADate:%20{{ info.bill_date }}%0ATenant%20Name:%20{{ info.tenant_name }}%0ARoom%20Rent:₹{{ info.rent }}%0AMaintenance:₹{{ info.maintenance }}%0AElectricity%20Charges:₹{{ info.electricity|default:'0.00' }}%0ATotal%20Bill:₹{{ info.total }}%0ATotal%20Paid:₹{{ info.collected }}%0APaid%20via%20UPI:₹{{ info.upi_amount|default:'0.00' }}%0APaid%20via%20Cash:₹{{ info.cash_amount|default:'0.00' }}" 
                                            target="_blank" 
                                            class="btn btn-sm btn-success d-flex align-items-center gap-1 py-1 px-2" style="font-size: 0.8rem;">
                                             📲 WhatsApp
                                         </a>
                                         {% endif %}
-                                        <button type="button" class="btn btn-sm btn-outline-dark py-1 px-2" onclick="previewBill('{{ info.room.room_number }}', '{{ info.tenant_name }}', '{{ info.rent }}', '{{ info.maintenance }}', '{{ info.electricity }}', '{{ info.total }}', '{{ info.collected }}', '{{ info.upi_amount }}', '{{ info.cash_amount }}', '{{ info.pending }}')">
+                                        <button type="button" class="btn btn-sm btn-outline-dark py-1 px-2" onclick="previewBill('{{ info.room.room_number }}', '{{ info.bill_date }}', '{{ info.tenant_name }}', '{{ info.rent }}', '{{ info.maintenance }}', '{{ info.electricity }}', '{{ info.total }}', '{{ info.collected }}', '{{ info.upi_amount }}', '{{ info.cash_amount }}')">
                                             👁️
                                         </button>
                                     </div>
@@ -200,7 +200,7 @@
 </div>
 {% endfor %}
 
-<!-- 3. Preview Bill Receipt Modal (Exact 10-line format) -->
+<!-- 3. Preview Bill Receipt Modal (Date in Line 2, No Pending line) -->
 <div class="modal fade" id="billModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -209,7 +209,7 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-4 font-monospace" id="billModalContent" style="line-height: 1.8;">
-                <!-- Exact 10-line layout injected via JS -->
+                <!-- Layout injected via JS -->
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
@@ -244,20 +244,19 @@ function makeEbNil(rentRecordId) {
     });
 }
 
-function previewBill(room, tenant, rent, maint, eb, total, paid, upi, cash, pending) {
+function previewBill(room, billDate, tenant, rent, maint, eb, total, paid, upi, cash) {
     const content = `
         <div><strong>Room Number:</strong> ${room}</div>
+        <div><strong>Date:</strong> ${billDate}</div>
         <div><strong>Tenant Name:</strong> ${tenant || 'N/A'}</div>
         <div><strong>Room Rent:</strong> ₹${rent}</div>
-        <div><strong>Maintenance:</strong> ₹${maint || '0.00'}</div>
+        <div><strong>Maintenance:</strong> ₹${maint}</div>
         <div><strong>Electricity Charges:</strong> ₹${eb || '0.00'}</div>
         <hr class="my-2">
-        <div><strong>Total Bill:</strong> ₹${total}</div>
+        <div class="fs-5 fw-bold"><strong>Total Bill:</strong> ₹${total}</div>
         <div class="text-success"><strong>Total Paid:</strong> ₹${paid}</div>
         <div class="text-primary ps-3"><strong>Paid via UPI:</strong> ₹${upi || '0.00'}</div>
         <div class="text-secondary ps-3"><strong>Paid via Cash:</strong> ₹${cash || '0.00'}</div>
-        <hr class="my-2">
-        <div class="text-danger fw-bold"><strong>Pending Dues:</strong> ₹${pending}</div>
     `;
     document.getElementById('billModalContent').innerHTML = content;
     new bootstrap.Modal(document.getElementById('billModal')).show();

@@ -17,6 +17,7 @@
                     <span class="badge bg-warning text-dark mb-2">Multi-Room Owner ({{ rent_records.count }} Rooms)</span>
                     <h3 class="fw-bold mb-1">{{ tenant.primary_name|default:"Tenant" }}</h3>
                     <p class="text-muted mb-0">📞 Phone: <strong>{{ tenant.phone_number|default:"N/A" }}</strong></p>
+                    <p class="text-muted mb-0">📅 Statement Date: <strong>{{ bill_date }}</strong></p>
                 </div>
                 <div class="col-md-6 text-md-end mt-3 mt-md-0">
                     <span class="text-muted small">Billing Month</span>
@@ -50,7 +51,6 @@
                             <th>Maintenance</th>
                             <th>Subtotal</th>
                             <th>Collected</th>
-                            <th>Pending</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -62,12 +62,11 @@
                             <td>₹{{ r.electricity_charge|default:"0.00" }}</td>
                             <td>₹{{ r.maintenance_charge|default:"0.00" }}</td>
                             <td class="fw-bold text-primary">₹{{ r.total_amount|default:"0.00" }}</td>
-                            <td class="text-success">₹{{ r.paid_amount|default:"0.00" }}</td>
-                            <td class="text-danger fw-bold">₹{{ r.current_balance_due|default:"0.00" }}</td>
+                            <td class="text-success fw-bold">₹{{ r.paid_amount|default:"0.00" }}</td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="8" class="text-center text-muted py-3">No room records found for this tenant.</td>
+                            <td colspan="7" class="text-center text-muted py-3">No room records found for this tenant.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -79,7 +78,6 @@
                             <td>₹{{ total_maintenance }}</td>
                             <td class="text-primary">₹{{ grand_total }}</td>
                             <td class="text-success">₹{{ total_paid }}</td>
-                            <td class="text-danger">₹{{ total_pending }}</td>
                         </tr>
                     </tfoot>
                 </table>
@@ -87,12 +85,16 @@
         </div>
     </div>
 
-    <!-- Overall Payment Summary Card -->
+    <!-- Overall Payment Summary Card without pending balance line -->
     <div class="row justify-content-end">
         <div class="col-md-5">
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-4 bg-light rounded font-monospace" style="line-height: 1.8;">
                     <h5 class="fw-bold mb-3 font-sans-serif">Consolidated Statement Summary</h5>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Date:</span>
+                        <span>{{ bill_date }}</span>
+                    </div>
                     <div class="d-flex justify-content-between mb-1">
                         <span>Total Rent:</span>
                         <span>₹{{ total_rent }}</span>
@@ -106,11 +108,11 @@
                         <span>₹{{ total_maintenance }}</span>
                     </div>
                     <hr class="my-2">
-                    <div class="d-flex justify-content-between mb-1 fs-5 fw-bold">
+                    <div class="d-flex justify-content-between mb-1 fs-5 fw-bold text-primary">
                         <span>Grand Total:</span>
                         <span>₹{{ grand_total }}</span>
                     </div>
-                    <div class="d-flex justify-content-between mb-1 text-success">
+                    <div class="d-flex justify-content-between mb-1 text-success fw-bold">
                         <span>Total Collected:</span>
                         <span>₹{{ total_paid }}</span>
                     </div>
@@ -121,11 +123,6 @@
                     <div class="d-flex justify-content-between mb-1 text-secondary small ps-3">
                         <span>Paid via Cash:</span>
                         <span>₹{{ total_cash }}</span>
-                    </div>
-                    <hr class="my-2">
-                    <div class="d-flex justify-content-between text-danger fs-5 fw-bold">
-                        <span>Pending Balance:</span>
-                        <span>₹{{ total_pending }}</span>
                     </div>
                 </div>
             </div>
