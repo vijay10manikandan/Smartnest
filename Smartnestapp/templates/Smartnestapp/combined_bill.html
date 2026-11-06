@@ -1,0 +1,137 @@
+{% extends 'Smartnestapp/base.html' %}
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0">Multi-Room Owner Combined Bill</h2>
+        <div class="d-flex gap-2">
+            <a href="{% url 'rent_details' %}" class="btn btn-outline-secondary btn-sm">⬅️ Back to Rent Details</a>
+            <button onclick="window.print()" class="btn btn-primary btn-sm">🖨️ Print Statement</button>
+        </div>
+    </div>
+
+    <!-- Tenant Header Summary -->
+    <div class="card mb-4 border-0 shadow-sm">
+        <div class="card-body bg-light rounded p-4">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <span class="badge bg-warning text-dark mb-2">Multi-Room Owner</span>
+                    <h3 class="fw-bold mb-1">{{ tenant.primary_name|default:tenant.name }}</h3>
+                    <p class="text-muted mb-0">📞 Phone: <strong>{{ tenant.phone_number|default:tenant.phone }}</strong></p>
+                </div>
+                <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                    <span class="text-muted small">Billing Month</span>
+                    <h4 class="fw-bold text-dark mb-2">{{ billing_month|date:"F Y" }}</h4>
+                    {% if tenant.phone_number or tenant.phone %}
+                    <a href="https://api.whatsapp.com/send?phone=91{{ tenant.phone_number|default:tenant.phone }}&text=Dear%20{{ tenant.primary_name|default:tenant.name }},%20Your%20Combined%20Monthly%20Statement%20for%20{{ billing_month|date:'F Y' }}:%0ATotal%20Rooms:%20{{ rent_records.count }}%0ATotal%20Rent:₹{{ total_rent }}%0ATotal%20Maintenance:₹{{ total_maintenance }}%0ATotal%20Electricity:₹{{ total_electricity }}%0AGrand%20Total:₹{{ grand_total }}%0ATotal%20Paid:₹{{ total_paid }}%0APaid%20via%20UPI:₹{{ total_upi }}%0APaid%20via%20Cash:₹{{ total_cash }}%0APending%20Dues:₹{{ total_pending }}." 
+                       target="_blank" 
+                       class="btn btn-success btn-sm">
+                        📲 Share Statement via WhatsApp
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Room-Wise Breakdown Table -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-dark text-white py-2">
+            <h5 class="mb-0 fw-semibold">Itemized Room Breakdown</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Room</th>
+                            <th>Building</th>
+                            <th>Rent</th>
+                            <th>Maintenance</th>
+                            <th>Electricity</th>
+                            <th>Total Bill</th>
+                            <th>Paid (Collected)</th>
+                            <th>Method</th>
+                            <th>Pending</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in rent_records %}
+                        <tr>
+                            <td><strong>{{ r.room.room_number }}</strong></td>
+                            <td>{{ r.room.building.name }}</td>
+                            <td>₹{{ r.rent_amount|default:"0.00" }}</td>
+                            <td>₹{{ r.maintenance_charge|default:"0.00" }}</td>
+                            <td>₹{{ r.electricity_charge|default:"0.00" }}</td>
+                            <td class="fw-bold">₹{{ r.total_amount|default:"0.00" }}</td>
+                            <td class="text-success fw-bold">₹{{ r.paid_amount|default:"0.00" }}</td>
+                            <td>
+                                {% if r.payment_method == 'SPLIT' %}
+                                    <span class="badge bg-primary">UPI: ₹{{ r.upi_amount|default:"0.00" }}</span>
+                                    <span class="badge bg-secondary">Cash: ₹{{ r.cash_amount|default:"0.00" }}</span>
+                                {% elif r.payment_method %}
+                                    <span class="badge bg-secondary">{{ r.payment_method }}</span>
+                                {% else %}
+                                    <span class="badge bg-light text-dark border">None</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-danger fw-bold">₹{{ r.current_balance_due|default:"0.00" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="9" class="text-center text-muted py-3">No room records found for this tenant.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot class="table-secondary fw-bold">
+                        <tr>
+                            <td colspan="2">Consolidated Totals</td>
+                            <td>₹{{ total_rent }}</td>
+                            <td>₹{{ total_maintenance }}</td>
+                            <td>₹{{ total_electricity }}</td>
+                            <td>₹{{ grand_total }}</td>
+                            <td class="text-success">₹{{ total_paid }}</td>
+                            <td>
+                                <div class="small">UPI: ₹{{ total_upi }}</div>
+                                <div class="small">Cash: ₹{{ total_cash }}</div>
+                            </td>
+                            <td class="text-danger">₹{{ total_pending }}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Final Summary Card -->
+    <div class="row justify-content-end">
+        <div class="col-md-5">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4 bg-light rounded">
+                    <h5 class="fw-bold mb-3">Overall Payment Summary</h5>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Combined Bill Amount:</span>
+                        <strong class="fs-6">₹{{ grand_total }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2 text-success">
+                        <span>Total Amount Collected:</span>
+                        <strong class="fs-6">₹{{ total_paid }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2 text-primary small ps-3">
+                        <span>Total Collected via UPI:</span>
+                        <span>₹{{ total_upi }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2 text-secondary small ps-3">
+                        <span>Total Collected via Cash:</span>
+                        <span>₹{{ total_cash }}</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between text-danger fs-5 fw-bold">
+                        <span>Total Balance Due:</span>
+                        <span>₹{{ total_pending }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
