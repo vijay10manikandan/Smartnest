@@ -32,7 +32,7 @@ urlpatterns = [
     path('advance-details/', views.advance_details_view, name='advance_details'),
     path('advance-details/add/', views.edit_advance_view, name='add_advance'),
     path('advance-details/edit/<int:advance_id>/', views.edit_advance_view, name='edit_advance'),
-    
+    path('api/rent-detail/<int:pk>/set-nil/', views.set_eb_nil, name='set_eb_nil'),
     # Electricity Readings
     path('electricity/', views.electricity_view, name='electricity'),
     path('electricity/add/', views.edit_electricity_view, name='add_electricity'),

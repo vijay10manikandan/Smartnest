@@ -1,0 +1,84 @@
+{% extends 'Smartnestapp/base.html' %}
+{% block content %}
+<div class="container py-3">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold mb-0">Monthly Expenses Details</h3>
+        <span class="badge bg-danger fs-6">Total: ₹{{ expense.total_expense }}</span>
+    </div>
+
+    <form method="POST" class="card shadow-sm p-4 bg-white rounded">
+        {% csrf_token %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th style="width: 80px;">Active</th>
+                        <th>Expense Description</th>
+                        <th style="width: 250px;">Amount (₹)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input type="checkbox" name="grt_active" class="form-check-input" {% if expense.grt_payment_active %}checked{% endif %}></td>
+                        <td>GRT Payment</td>
+                        <td><input type="number" step="0.01" name="grt_amount" class="form-control form-control-sm" value="{{ expense.grt_payment }}"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" name="tneb_active" class="form-check-input" {% if expense.tneb_active %}checked{% endif %}></td>
+                        <td>TNEB Payment</td>
+                        <td><input type="number" step="0.01" name="tneb_amount" class="form-control form-control-sm" value="{{ expense.tneb_payment }}"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" name="mani1_active" class="form-check-input" {% if expense.mani_chit_1_active %}checked{% endif %}></td>
+                        <td>Mani Chit (1)</td>
+                        <td><input type="number" step="0.01" name="mani1_amount" class="form-control form-control-sm" value="{{ expense.mani_chit_1 }}"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" name="mani2_active" class="form-check-input" {% if expense.mani_chit_2_active %}checked{% endif %}></td>
+                        <td>Mani Chit (2)</td>
+                        <td><input type="number" step="0.01" name="mani2_amount" class="form-control form-control-sm" value="{{ expense.mani_chit_2 }}"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" name="indira_active" class="form-check-input" {% if expense.indira_chit_active %}checked{% endif %}></td>
+                        <td>Indira Chit</td>
+                        <td><input type="number" step="0.01" name="indira_amount" class="form-control form-control-sm" value="{{ expense.indira_chit }}"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" name="milk_active" class="form-check-input" {% if expense.dhamayanthi_milk_chit_active %}checked{% endif %}></td>
+                        <td>Dhamayanthi Milk and Chit</td>
+                        <td><input type="number" step="0.01" name="milk_amount" class="form-control form-control-sm" value="{{ expense.dhamayanthi_milk_chit }}"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" name="gas_active" class="form-check-input" {% if expense.gas_cylinder_active %}checked{% endif %}></td>
+                        <td>Gas Cylinder</td>
+                        <td><input type="number" step="0.01" name="gas_amount" class="form-control form-control-sm" value="{{ expense.gas_cylinder }}"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" name="groceries_active" class="form-check-input" {% if expense.groceries_active %}checked{% endif %}></td>
+                        <td>Groceries</td>
+                        <td><input type="number" step="0.01" name="groceries_amount" class="form-control form-control-sm" value="{{ expense.groceries }}"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" name="hardwares_active" class="form-check-input" {% if expense.hardwares_active %}checked{% endif %}></td>
+                        <td>Hardwares</td>
+                        <td><input type="number" step="0.01" name="hardwares_amount" class="form-control form-control-sm" value="{{ expense.hardwares }}"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" name="broadband_active" class="form-check-input" {% if expense.broadband_3_active %}checked{% endif %}></td>
+                        <td>Broadband Recharge (3)</td>
+                        <td><input type="number" step="0.01" name="broadband_amount" class="form-control form-control-sm" value="{{ expense.broadband_recharge_3 }}"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" name="other_active" class="form-check-input" {% if expense.other_expenses_active %}checked{% endif %}></td>
+                        <td>Other Expenses</td>
+                        <td><input type="number" step="0.01" name="other_amount" class="form-control form-control-sm" value="{{ expense.other_expenses }}"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="text-end mt-3">
+            <button type="submit" class="btn btn-primary px-4">💾 Save Expenses</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

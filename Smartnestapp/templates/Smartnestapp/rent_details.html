@@ -40,6 +40,19 @@
                     <tr>
                         <td><strong>{{ row.room.room_number }}</strong></td>
                         <td>
+                            <div class="d-flex align-items-center gap-1">
+                                <span id="eb-val-{{ row.id }}">₹{{ row.electricity }}</span>
+                                {% if row.electricity > 0 %}
+                                    <button type="button" 
+                                            class="btn btn-outline-secondary btn-sm py-0 px-1" 
+                                            style="font-size: 0.72rem;" 
+                                            onclick="setEbNil('{{ row.id }}')">
+                                        Nil
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
                             {% if row.tenant %}
                                 <span class="fw-semibold">{{ row.tenant.primary_name }}</span>
                                 {% if row.is_multi_room %}
@@ -231,7 +244,26 @@ function openPaymentModal(roomId, roomNo, tenantName, total, collected, collecti
         payModal.show();
     }
 }
+function setEbNil(rentDetailId) {
+    if (!confirm("Set electricity charge to Nil (₹0) for this room?")) return;
 
+    fetch(`/api/rent-detail/${rentDetailId}/set-nil/`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}"
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            // Reload table or update DOM values dynamically
+            location.reload();
+        } else {
+            alert("Error: " + data.error);
+        }
+    });
+}
 function showSingleBill(roomId) {
     fetch(`/api/bill/single/${roomId}/`)
         .then(res => res.json())

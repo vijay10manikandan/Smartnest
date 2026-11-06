@@ -1,7 +1,7 @@
 from decimal import Decimal
 from datetime import date, datetime
 import urllib.parse
-
+from .models import MonthlyExpense
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
@@ -130,7 +130,6 @@ def dashboard_view(request):
     ).aggregate(total=Sum('amount_paid'))['total'] or Decimal('0.00')
 
     # 5. Building Electricity Units (Building-1 and Building-2 for current month)
-    # Sums units_consumed for each building's rooms
     b1_readings = ElectricityReading.objects.filter(
         room__building__name__icontains="Building-1",
         month_year=current_month
@@ -143,11 +142,25 @@ def dashboard_view(request):
     )
     b2_total_units = sum([r.units_consumed for r in b2_readings])
 
-    # 6. Rental Due and Rent Reminders (Unchanged)
+    # 6. Rental Due and Rent Reminders
     overdue_reminders = RentDetail.objects.filter(
         is_paid=False,
         month=current_month
     ).select_related('room', 'tenant', 'room__building')
+
+    # 7. Monthly Expenses Calculation
+    # Dynamic search matching "Nov 2026" or whichever month is active
+    current_month_str = current_month.strftime('%b %Y')  # e.g., 'Nov 2026'
+    expense = MonthlyExpense.objects.filter(month=current_month_str).first()
+    
+    if not expense:
+        expense = MonthlyExpense.objects.first()
+        
+    total_expenses = Decimal(str(expense.total_expense())) if expense else Decimal('0.00')
+
+    # 8. Net Profit Calculation (Total Collected - Total Expenses)
+    net_profit = total_collected - total_expenses
+    is_profit = net_profit >= Decimal('0.00')
 
     context = {
         'total_rooms': total_rooms,
@@ -163,9 +176,29 @@ def dashboard_view(request):
         'b1_total_units': b1_total_units,
         'b2_total_units': b2_total_units,
         'overdue_reminders': overdue_reminders,
+        'total_expenses': total_expenses,
+        'net_profit': net_profit,
+        'is_profit': is_profit,
     }
     return render(request, 'Smartnestapp/dashboard.html', context)
-
+@login_required
+def edit_electricity_view(request, reading_id=None):
+    reading = get_object_or_404(ElectricityReading, id=reading_id) if reading_id else None
+    
+    if request.method == 'POST':
+        form = ElectricityReadingForm(request.POST, instance=reading)
+        if form.is_valid():
+            saved_reading = form.save()
+            messages.success(request, f"Electricity reading for {saved_reading.room} saved!")
+            return redirect('electricity')
+    else:
+        form = ElectricityReadingForm(instance=reading)
+        
+    return render(request, 'Smartnestapp/edit_form.html', {
+        'form': form,
+        'title': f"{'Edit' if reading else 'Add'} Electricity Meter Reading",
+        'cancel_url': 'electricity'
+    })
 
 # ==============================================================================
 # 2. Room Details View (Floor-wise & Default Configurations)
@@ -688,24 +721,58 @@ def current_month_reading_view(request):
 
 @login_required
 def electricity_view(request):
-    buildings = Building.objects.prefetch_related('rooms__electricity_readings').all()
-    return render(request, 'Smartnestapp/electricity.html', {'buildings': buildings})
+    # 1. Fetch distinct months formatted as dates
+    # Gets all distinct months present in the readings
+    dates = (
+        ElectricityReading.objects.dates('month_year', 'month', order='DESC')
+    )
+    # Build list of strings like "Oct 2026", "Nov 2026"
+    months = [d.strftime('%b %Y') for d in dates]
 
-
-def edit_electricity_view(request, reading_id=None):
-    reading = get_object_or_404(ElectricityReading, id=reading_id) if reading_id else None
-    if request.method == 'POST':
-        form = ElectricityReadingForm(request.POST, instance=reading)
-        if form.is_valid():
-            saved_reading = form.save()
-            messages.success(request, f"Electricity reading for {saved_reading.room} saved!")
+    # 2. Handle deleting all records for the selected month
+    if request.method == 'POST' and 'delete_month' in request.POST:
+        target_month_str = request.POST.get('target_month')  # e.g., "Oct 2026"
+        if target_month_str:
+            try:
+                from datetime import datetime
+                parsed_date = datetime.strptime(target_month_str, '%b %Y')
+                deleted_count, _ = ElectricityReading.objects.filter(
+                    month_year__year=parsed_date.year,
+                    month_year__month=parsed_date.month
+                ).delete()
+                messages.success(request, f"Successfully removed all {deleted_count} readings for {target_month_str}!")
+            except Exception as e:
+                messages.error(request, f"Error deleting records: {e}")
             return redirect('electricity')
-    else:
-        form = ElectricityReadingForm(instance=reading)
-    return render(request, 'Smartnestapp/edit_form.html', {
-        'form': form,
-        'title': f"{'Edit' if reading else 'Add'} Electricity Meter Reading",
-        'cancel_url': 'electricity'
+
+    # 3. Check if user selected a month in the dropdown filter
+    selected_month = request.GET.get('month', '')
+    readings_qs = ElectricityReading.objects.all().order_by('-month_year')
+
+    if selected_month:
+        try:
+            from datetime import datetime
+            parsed_date = datetime.strptime(selected_month, '%b %Y')
+            readings_qs = readings_qs.filter(
+                month_year__year=parsed_date.year,
+                month_year__month=parsed_date.month
+            )
+        except Exception:
+            pass
+
+    # 4. Prefetch filtered readings into room.filtered_readings
+    buildings = Building.objects.prefetch_related(
+        Prefetch(
+            'rooms__electricity_readings',
+            queryset=readings_qs,
+            to_attr='filtered_readings'
+        )
+    ).all()
+
+    return render(request, 'Smartnestapp/electricity.html', {
+        'buildings': buildings,
+        'months': months,
+        'selected_month': selected_month
     })
 
 
@@ -910,3 +977,54 @@ def pwa_manifest(request):
 def pwa_sw(request):
     sw_code = "self.addEventListener('install', e => self.skipWaiting()); self.addEventListener('activate', e => clients.claim()); self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));"
     return HttpResponse(sw_code, content_type="application/javascript")
+def set_eb_nil(request, pk):
+    if request.method == "POST":
+        rent_record = get_object_or_404(RentDetail, pk=pk)
+        rent_record.electricity = 0
+        rent_record.total = rent_record.rent + rent_record.maintenance
+        rent_record.pending = rent_record.total - rent_record.collected
+        rent_record.save()
+        return JsonResponse({"success": True})
+    return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
+def expense_details_view(request):
+    expense, _ = MonthlyExpense.objects.get_or_create(month="Nov 2026")
+    
+    if request.method == "POST":
+        expense.grt_payment_active = 'grt_active' in request.POST
+        expense.grt_payment = request.POST.get('grt_amount', 25000)
+        
+        expense.tneb_active = 'tneb_active' in request.POST
+        expense.tneb_payment = request.POST.get('tneb_amount', 0)
+        
+        expense.mani_chit_1_active = 'mani1_active' in request.POST
+        expense.mani_chit_1 = request.POST.get('mani1_amount', 0)
+        
+        expense.mani_chit_2_active = 'mani2_active' in request.POST
+        expense.mani_chit_2 = request.POST.get('mani2_amount', 0)
+        
+        expense.indira_chit_active = 'indira_active' in request.POST
+        expense.indira_chit = request.POST.get('indira_amount', 0)
+        
+        expense.dhamayanthi_milk_chit_active = 'milk_active' in request.POST
+        expense.dhamayanthi_milk_chit = request.POST.get('milk_amount', 0)
+        
+        expense.gas_cylinder_active = 'gas_active' in request.POST
+        expense.gas_cylinder = request.POST.get('gas_amount', 0)
+        
+        expense.groceries_active = 'groceries_active' in request.POST
+        expense.groceries = request.POST.get('groceries_amount', 0)
+        
+        expense.hardwares_active = 'hardwares_active' in request.POST
+        expense.hardwares = request.POST.get('hardwares_amount', 0)
+        
+        expense.broadband_3_active = 'broadband_active' in request.POST
+        expense.broadband_recharge_3 = request.POST.get('broadband_amount', 0)
+        
+        expense.other_expenses_active = 'other_active' in request.POST
+        expense.other_expenses = request.POST.get('other_amount', 0)
+        
+        expense.save()
+        messages.success(request, "Expenses updated successfully!")
+        return redirect('expense_details')
+
+    return render(request, 'Smartnestapp/expenses.html', {'expense': expense})

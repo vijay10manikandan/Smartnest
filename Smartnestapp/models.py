@@ -216,3 +216,59 @@ class RentDetail(models.Model):
         self.calculate_total_bill()
         self.is_paid = (Decimal(str(self.paid_amount or 0)) >= self.total_amount and self.total_amount > Decimal('0.00'))
         super().save(*args, **kwargs)
+class MonthlyExpense(models.Model):
+    month = models.CharField(max_length=20, default="Nov 2026") # e.g., 'Nov 2026'
+    
+    # 11 Editable expense fields
+    grt_payment_active = models.BooleanField(default=True)
+    grt_payment = models.DecimalField(max_digits=10, decimal_places=2, default=25000.00)
+    
+    tneb_active = models.BooleanField(default=True)
+    tneb_payment = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    
+    mani_chit_1_active = models.BooleanField(default=True)
+    mani_chit_1 = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    
+    mani_chit_2_active = models.BooleanField(default=True)
+    mani_chit_2 = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    
+    indira_chit_active = models.BooleanField(default=True)
+    indira_chit = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    
+    dhamayanthi_milk_chit_active = models.BooleanField(default=True)
+    dhamayanthi_milk_chit = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    
+    gas_cylinder_active = models.BooleanField(default=True)
+    gas_cylinder = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    
+    groceries_active = models.BooleanField(default=True)
+    groceries = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    
+    hardwares_active = models.BooleanField(default=True)
+    hardwares = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    
+    broadband_3_active = models.BooleanField(default=True)
+    broadband_recharge_3 = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    
+    other_expenses_active = models.BooleanField(default=True)
+    other_expenses = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def total_expense(self):
+        total = 0
+        if self.grt_payment_active: total += self.grt_payment
+        if self.tneb_active: total += self.tneb_payment
+        if self.mani_chit_1_active: total += self.mani_chit_1
+        if self.mani_chit_2_active: total += self.mani_chit_2
+        if self.indira_chit_active: total += self.indira_chit
+        if self.dhamayanthi_milk_chit_active: total += self.dhamayanthi_milk_chit
+        if self.gas_cylinder_active: total += self.gas_cylinder
+        if self.groceries_active: total += self.groceries
+        if self.hardwares_active: total += self.hardwares
+        if self.broadband_3_active: total += self.broadband_recharge_3
+        if self.other_expenses_active: total += self.other_expenses
+        return total
+
+    def __str__(self):
+        return f"Expenses ({self.month})"

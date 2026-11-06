@@ -1,54 +1,97 @@
 {% extends 'Smartnestapp/base.html' %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Electricity Charges (₹10 / Unit)</h2>
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <h2 class="mb-0">Electricity Charges (₹10 / Unit)</h2>
     <a href="{% url 'add_electricity' %}" class="btn btn-primary">+ Record Reading</a>
 </div>
 
 {% if messages %}
-    {% for msg in messages %}<div class="alert alert-success">{{ msg }}</div>{% endfor %}
+    {% for msg in messages %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ msg }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
 {% endif %}
 
-{% for b in buildings %}
-<div class="card mb-4 shadow-sm">
-    <div class="card-header bg-secondary text-white">{{ b.name }}</div>
-    <div class="card-body p-0">
-        <table class="table table-hover mb-0 align-middle">
-            <thead class="table-light">
-                <tr>
-                    <th>Room</th>
-                    <th>Month</th>
-                    <th>Previous</th>
-                    <th>Current</th>
-                    <th>Units</th>
-                    <th>Amount (₹)</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for r in b.rooms.all %}
-                    {% for log in r.electricity_readings.all %}
-                    <tr>
-                        <td><strong>{{ r.room_number }}</strong></td>
-                        <td>{{ log.month_year|date:"M Y" }}</td>
-                        <td>{{ log.previous_reading }}</td>
-                        <td>{{ log.current_reading }}</td>
-                        <td>{{ log.units_consumed }}</td>
-                        <td class="fw-bold text-success">₹{{ log.total_electricity_amount }}</td>
-                        <td>
-                            <a href="{% url 'edit_electricity' log.id %}" class="btn btn-sm btn-outline-primary">✏️ Edit</a>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td><strong>{{ r.room_number }}</strong></td>
-                        <td colspan="5" class="text-muted">No meter reading recorded.</td>
-                        <td><a href="{% url 'add_electricity' %}" class="btn btn-sm btn-outline-secondary">+ Add</a></td>
-                    </tr>
-                    {% endfor %}
+<!-- Month Filter & Delete Selected Month Toolbar -->
+<div class="card p-3 mb-4 shadow-sm bg-white border-0">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <!-- Month Filter Dropdown -->
+        <form method="GET" class="d-flex align-items-center gap-2 m-0">
+            <label class="fw-semibold text-secondary mb-0 text-nowrap">Filter Month:</label>
+            <select name="month" class="form-select form-select-sm" onchange="this.form.submit()" style="min-width: 170px;">
+                <option value="">Show All Months</option>
+                {% for m in months %}
+                    <option value="{{ m }}" {% if selected_month == m %}selected{% endif %}>{{ m }}</option>
                 {% endfor %}
-            </tbody>
-        </table>
+            </select>
+            {% if selected_month %}
+                <a href="{% url 'electricity' %}" class="btn btn-sm btn-outline-secondary">Reset</a>
+            {% endif %}
+        </form>
+
+        <!-- Delete Selected Month Records Button -->
+        {% if selected_month %}
+        <form method="POST" class="m-0" onsubmit="return confirm('WARNING: Are you sure you want to permanently delete all electricity records for {{ selected_month }}?');">
+            {% csrf_token %}
+            <input type="hidden" name="target_month" value="{{ selected_month }}">
+            <button type="submit" name="delete_month" class="btn btn-sm btn-outline-danger d-flex align-items-center gap-1">
+                🗑️ Remove {{ selected_month }} Details
+            </button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+{% for b in buildings %}
+<div class="card mb-4 shadow-sm border-0">
+    <div class="card-header bg-secondary text-white fw-bold">{{ b.name }}</div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Room</th>
+                        <th>Month</th>
+                        <th>Previous</th>
+                        <th>Current</th>
+                        <th>Units</th>
+                        <th>Amount (₹)</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in b.rooms.all %}
+                        {% for log in r.filtered_readings %}
+                        <tr>
+                            <td><strong>{{ r.room_number }}</strong></td>
+                            <td>{{ log.month_year|date:"M Y" }}</td>
+                            <td>{{ log.previous_reading }}</td>
+                            <td>{{ log.current_reading }}</td>
+                            <td>{{ log.units_consumed }}</td>
+                            <td class="fw-bold text-success">₹{{ log.total_electricity_amount }}</td>
+                            <td>
+                                <a href="{% url 'edit_electricity' log.id %}" class="btn btn-sm btn-outline-primary">✏️ Edit</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td><strong>{{ r.room_number }}</strong></td>
+                            <td colspan="5" class="text-muted">
+                                {% if selected_month %}
+                                    No meter reading for {{ selected_month }}.
+                                {% else %}
+                                    No meter reading recorded.
+                                {% endif %}
+                            </td>
+                            <td><a href="{% url 'add_electricity' %}" class="btn btn-sm btn-outline-secondary">+ Add</a></td>
+                        </tr>
+                        {% endfor %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 {% endfor %}
