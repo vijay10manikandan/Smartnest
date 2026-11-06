@@ -294,100 +294,48 @@ def extract_numeric_by_keywords(instance, keywords):
 
 def get_room_maint_value(room):
     """
-    Calculates maintenance based on Room Details modify settings:
-    - If Per Member: total_no_of_persons * rate
-    - If Per Room: rate
+    Computes maintenance using exact Room columns:
+    - If PER_MEMBER: total_members * maintenance_rate_per_member
+    - If PER_ROOM: maintenance_charges
     """
     if not room:
         return Decimal('0.00')
 
-    # 1. Fetch Maintenance Rate / Amount configured in Room Details
-    rate = Decimal('0.00')
-    for attr in [
-        'maintenance_rate', 'maintenance_charge', 'maintenance_amount', 
-        'maintenance', 'maint_rate', 'monthly_maintenance'
-    ]:
-        val = getattr(room, attr, None)
-        if val is not None and str(val).strip() != '':
-            try:
-                rate = Decimal(str(val))
-                if rate > Decimal('0.00'):
-                    break
-            except (ValueError, TypeError):
-                pass
+    m_type = str(getattr(room, 'maintenance_type', 'PER_ROOM') or 'PER_ROOM').strip().upper()
 
-    # 2. Determine whether 'Per Member' or 'Per Room' is selected
-    # Checks common radio/select field names and boolean flags
-    is_per_member = False
-    for type_attr in [
-        'maintenance_type', 'maintenance_mode', 'maint_type', 
-        'billing_type', 'calc_type', 'maintenance_basis'
-    ]:
-        val = getattr(room, type_attr, None)
-        if val:
-            val_str = str(val).strip().lower()
-            if any(term in val_str for term in ['member', 'person', 'per_member', 'per_person', 'head']):
-                is_per_member = True
-                break
+    if m_type == 'PER_MEMBER':
+        rate = Decimal(str(getattr(room, 'maintenance_rate_per_member', '0.00') or 0))
+        
+        # Determine number of persons/members from tenant or room
+        persons = 1
+        tenant = getattr(room, 'current_tenant', None)
+        if tenant:
+            for attr in ['total_members', 'no_of_members', 'members_count', 'total_persons', 'members', 'occupants']:
+                t_val = getattr(tenant, attr, None)
+                if t_val:
+                    try:
+                        p = int(t_val)
+                        if p > 0:
+                            persons = p
+                            break
+                    except (ValueError, TypeError):
+                        pass
+        return rate * Decimal(str(persons))
 
-    # Also check if boolean flag was used (e.g. is_per_member = True)
-    for bool_attr in ['is_per_member', 'per_member', 'by_member', 'per_person']:
-        val = getattr(room, bool_attr, None)
-        if isinstance(val, bool) and val:
-            is_per_member = True
-            break
-
-    # 3. If 'Per Room', return the base rate directly
-    if not is_per_member:
-        return rate
-
-    # 4. If 'Per Member', find total persons (from Room or Tenant)
-    persons = 1
-    # Check persons on the Room itself
-    for p_attr in ['total_persons', 'no_of_persons', 'members_count', 'occupants_count', 'persons', 'members']:
-        val = getattr(room, p_attr, None)
-        if val:
-            try:
-                p_int = int(val)
-                if p_int > 0:
-                    persons = p_int
-                    break
-            except (ValueError, TypeError):
-                pass
-
-    # Check persons on current Tenant if not on Room
-    tenant = getattr(room, 'current_tenant', None)
-    if tenant and persons == 1:
-        for tp_attr in ['total_members', 'no_of_persons', 'members', 'occupants', 'members_count']:
-            val = getattr(tenant, tp_attr, None)
-            if val:
-                try:
-                    p_int = int(val)
-                    if p_int > 0:
-                        persons = p_int
-                        break
-                except (ValueError, TypeError):
-                    pass
-
-    return rate * Decimal(str(persons))
+    # Default is PER_ROOM
+    return Decimal(str(getattr(room, 'maintenance_charges', '0.00') or 0))
 
 
 def get_room_target_advance(room):
-    """
-    Auto-detects Target Advance across Room and attached Tenant fields.
-    """
-    # 1. Check Room fields (matches 'target_advance', 'advance', 'deposit', 'target_deposit', etc.)
-    val = extract_numeric_by_keywords(room, ['advance', 'deposit', 'target'])
-    if val > Decimal('0.00'):
-        return val
-
-    # 2. Check Tenant fields
-    tenant = getattr(room, 'current_tenant', None)
-    if tenant:
-        val = extract_numeric_by_keywords(tenant, ['advance', 'deposit', 'target', 'agreement'])
-        if val > Decimal('0.00'):
-            return val
-
+    """Fetches exact target advance from Room."""
+    if not room:
+        return Decimal('0.00')
+    val = getattr(room, 'target_advance_amount', None)
+    if val is not None:
+        try:
+            return Decimal(str(val))
+        except (ValueError, TypeError):
+            pass
     return Decimal('0.00')
 
 @login_required
