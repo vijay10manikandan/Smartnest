@@ -15,14 +15,14 @@
             <div class="row align-items-center">
                 <div class="col-md-6">
                     <span class="badge bg-warning text-dark mb-2">Multi-Room Owner</span>
-                    <h3 class="fw-bold mb-1">{{ tenant.primary_name|default:tenant.name }}</h3>
-                    <p class="text-muted mb-0">📞 Phone: <strong>{{ tenant.phone_number|default:tenant.phone }}</strong></p>
+                    <h3 class="fw-bold mb-1">{{ tenant.primary_name|default:"Tenant" }}</h3>
+                    <p class="text-muted mb-0">📞 Phone: <strong>{{ tenant.phone_number|default:"N/A" }}</strong></p>
                 </div>
                 <div class="col-md-6 text-md-end mt-3 mt-md-0">
                     <span class="text-muted small">Billing Month</span>
                     <h4 class="fw-bold text-dark mb-2">{{ billing_month|date:"F Y" }}</h4>
-                    {% if tenant.phone_number or tenant.phone %}
-                    <a href="https://api.whatsapp.com/send?phone=91{{ tenant.phone_number|default:tenant.phone }}&text=Dear%20{{ tenant.primary_name|default:tenant.name }},%20Your%20Combined%20Monthly%20Statement%20for%20{{ billing_month|date:'F Y' }}:%0ATotal%20Rooms:%20{{ rent_records.count }}%0ATotal%20Rent:₹{{ total_rent }}%0ATotal%20Maintenance:₹{{ total_maintenance }}%0ATotal%20Electricity:₹{{ total_electricity }}%0AGrand%20Total:₹{{ grand_total }}%0ATotal%20Paid:₹{{ total_paid }}%0APaid%20via%20UPI:₹{{ total_upi }}%0APaid%20via%20Cash:₹{{ total_cash }}%0APending%20Dues:₹{{ total_pending }}." 
+                    {% if tenant.phone_number %}
+                    <a href="https://api.whatsapp.com/send?phone=91{{ tenant.phone_number }}&text=Dear%20{{ tenant.primary_name }},%20Your%20Combined%20Monthly%20Statement%20for%20{{ billing_month|date:'F Y' }}:%0ATotal%20Rooms:%20{{ rent_records.count }}%0ATotal%20Rent:₹{{ total_rent }}%0ATotal%20Maintenance:₹{{ total_maintenance }}%0ATotal%20Electricity:₹{{ total_electricity }}%0AGrand%20Total:₹{{ grand_total }}%0ATotal%20Paid:₹{{ total_paid }}%0APaid%20via%20UPI:₹{{ total_upi }}%0APaid%20via%20Cash:₹{{ total_cash }}%0APending%20Dues:₹{{ total_pending }}." 
                        target="_blank" 
                        class="btn btn-success btn-sm">
                         📲 Share Statement via WhatsApp
