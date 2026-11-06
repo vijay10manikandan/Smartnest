@@ -292,7 +292,7 @@ def rent_details_view(request):
         elec_amount = latest_elec.total_electricity_amount if latest_elec else Decimal('0.00')
         maint_amount, _ = get_room_maintenance_breakdown(room)
 
-        rent_record, _ = RentDetail.objects.get_or_create(
+        rent_record, created = RentDetail.objects.get_or_create(
             room=room,
             month=current_month,
             defaults={
@@ -300,20 +300,24 @@ def rent_details_view(request):
                 'rent_amount': room.monthly_rent,
                 'electricity_charge': elec_amount,
                 'maintenance_charge': maint_amount,
-                'paid_amount': Decimal('0.00'),
+                'paid_amount': collected_amount,
+                'collection_date': collection_date,
                 'last_month_balance': Decimal('0.00'),
                 'payment_method': payment_method,
             }
         )
 
-        rent_record.tenant = room.current_tenant
-        rent_record.rent_amount = room.monthly_rent
-        rent_record.maintenance_charge = maint_amount
-        rent_record.electricity_charge = elec_amount
-        rent_record.paid_amount = collected_amount
-        rent_record.collection_date = collection_date
-        rent_record.payment_method = payment_method
-        rent_record.save()  # Triggers calculate_total_bill and is_paid check
+        if not created:
+            rent_record.tenant = room.current_tenant
+            rent_record.rent_amount = room.monthly_rent
+            rent_record.maintenance_charge = maint_amount
+            # Preserve Nil if user explicitly set it to 0.00
+            if rent_record.electricity_charge != Decimal('0.00'):
+                rent_record.electricity_charge = elec_amount
+            rent_record.paid_amount = collected_amount
+            rent_record.collection_date = collection_date
+            rent_record.payment_method = payment_method
+            rent_record.save()
 
         messages.success(request, f"Updated Room {room.room_number}: Collected ₹{collected_amount} via {payment_method}")
         return redirect('rent_details')
@@ -329,7 +333,7 @@ def rent_details_view(request):
         elec_cost = latest_elec.total_electricity_amount if latest_elec else Decimal('0.00')
         maint_cost, _ = get_room_maintenance_breakdown(r)
 
-        rent_record, _ = RentDetail.objects.get_or_create(
+        rent_record, created = RentDetail.objects.get_or_create(
             room=r,
             month=current_month,
             defaults={
@@ -340,12 +344,15 @@ def rent_details_view(request):
                 'last_month_balance': Decimal('0.00'),
             }
         )
-        rent_record.rent_amount = r.monthly_rent
-        rent_record.maintenance_charge = maint_cost
-        rent_record.electricity_charge = elec_cost
-        rent_record.save()
 
-        # Dynamic pending calculation: Total Billed - Amount Collected
+        if not created:
+            rent_record.rent_amount = r.monthly_rent
+            rent_record.maintenance_charge = maint_cost
+            # Do NOT overwrite electricity if it was already marked as Nil (0.00)
+            if rent_record.electricity_charge != Decimal('0.00'):
+                rent_record.electricity_charge = elec_cost
+            rent_record.save()
+
         pending_balance = rent_record.current_balance_due
 
         info = {
@@ -357,24 +364,27 @@ def rent_details_view(request):
             'total': rent_record.total_amount,
             'collected': rent_record.paid_amount,
             'pending': pending_balance,
+            'payment_method': rent_record.payment_method,
             'rent_record': rent_record,
         }
         room_data_cache[r.id] = info
 
-        if tenant:
-            key = (tenant.primary_name.strip().lower(), tenant.phone_number.strip())
+        if tenant and getattr(tenant, 'primary_name', None) and getattr(tenant, 'phone_number', None):
+            key = (tenant.primary_name.strip().lower(), str(tenant.phone_number).strip())
             tenant_rooms_map.setdefault(key, []).append(info)
 
     building_data = []
     for b in Building.objects.all():
         rooms_info = []
         for r in [rm for rm in all_rooms if rm.building_id == b.id]:
-            info = room_data_cache[r.id]
+            info = room_data_cache.get(r.id)
+            if not info:
+                continue
             tenant = info['tenant']
             is_multi = False
 
-            if tenant:
-                t_key = (tenant.primary_name.strip().lower(), tenant.phone_number.strip())
+            if tenant and getattr(tenant, 'primary_name', None) and getattr(tenant, 'phone_number', None):
+                t_key = (tenant.primary_name.strip().lower(), str(tenant.phone_number).strip())
                 is_multi = len(tenant_rooms_map.get(t_key, [])) > 1
 
             info['is_multi_room'] = is_multi
@@ -390,6 +400,22 @@ def rent_details_view(request):
         'billing_month': current_month
     })
 
+
+@login_required
+def set_eb_nil(request, pk):
+    if request.method == "POST":
+        rent_record = get_object_or_404(RentDetail, pk=pk)
+        
+        # Zero out electricity using the exact model field name
+        rent_record.electricity_charge = Decimal('0.00')
+        rent_record.save()  # Triggers calculate_total_bill, updating total_amount & current_balance_due
+        
+        return JsonResponse({
+            "success": True,
+            "total_amount": float(rent_record.total_amount),
+            "pending_amount": float(rent_record.current_balance_due)
+        })
+    return JsonResponse({"success": False, "error": "Invalid request method"}, status=400)
 @login_required
 def get_single_bill(request, room_id):
     """Generates Single Bill with payment acknowledgement and remaining pending balance."""
@@ -983,30 +1009,7 @@ def pwa_sw(request):
         "});"
     )
     return HttpResponse(js_content, content_type="application/javascript")
-@login_required
-def set_eb_nil(request, pk):
-    if request.method == "POST":
-        rent_record = get_object_or_404(RentDetail, pk=pk)
-        
-        # Zero out electricity
-        rent_record.electricity_amount = Decimal('0.00')
-        
-        # Recalculate total: Rent + Maintenance (excluding electricity)
-        rent_amt = rent_record.rent_amount or Decimal('0.00')
-        maint_amt = rent_record.maintenance_charge or Decimal('0.00')
-        paid_amt = rent_record.paid_amount or Decimal('0.00')
-        
-        rent_record.total_amount = rent_amt + maint_amt
-        rent_record.pending_amount = max(Decimal('0.00'), rent_record.total_amount - paid_amt)
-        rent_record.is_paid = (rent_record.pending_amount == Decimal('0.00'))
-        
-        rent_record.save()
-        return JsonResponse({
-            "success": True,
-            "total_amount": float(rent_record.total_amount),
-            "pending_amount": float(rent_record.pending_amount)
-        })
-    return JsonResponse({"success": False, "error": "Invalid request method"}, status=400)
+
 def expense_details_view(request):
     expense, _ = MonthlyExpense.objects.get_or_create(month="Nov 2026")
     
