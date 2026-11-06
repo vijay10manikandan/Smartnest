@@ -90,43 +90,27 @@ class Tenant(models.Model):
 
 
 class AdvanceDetail(models.Model):
-    STATUS_CHOICES = [
-        ('paid', 'Paid'),
-        ('pending', 'Pending'),
-        ('no_advance', 'No Advance'),
-    ]
-    PAYMENT_METHOD_CHOICES = [
-        ('UPI', 'UPI'),
-        ('CASH', 'CASH'),
-    ]
-
-    room = models.ForeignKey(Room, related_name='advance_records', on_delete=models.CASCADE)
-    tenant = models.ForeignKey(Tenant, on_delete=models.SET_NULL, null=True, blank=True)
+    room = models.ForeignKey('Room', on_delete=models.CASCADE, related_name='advance_records')
+    tenant = models.ForeignKey('Tenant', on_delete=models.SET_NULL, null=True, blank=True)
+    agreement_advance = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    
+    # Split payment fields for Advance
+    cash_amount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    upi_amount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
     amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
-    payment_method = models.CharField(max_length=10, choices=PAYMENT_METHOD_CHOICES, default='UPI')
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='no_advance')
-    payment_date = models.DateField(default=timezone.now)
-    is_active = models.BooleanField(default=True)
-
-    def __str__(self):
-        return f"Advance: {self.room.room_number} - ₹{self.amount_paid}"
-
-    @property
-    def balance_pending(self):
-        return max(Decimal('0.00'), self.room.target_advance_amount - self.amount_paid)
+    payment_method = models.CharField(max_length=20, default='UPI')
+    paid_date = models.DateField(null=True, blank=True)
+    pending_advance = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
 
     def save(self, *args, **kwargs):
-        # Auto-compute status based on amount paid vs target advance
-        target = self.room.target_advance_amount if self.room else Decimal('0.00')
-        paid = self.amount_paid or Decimal('0.00')
-
-        if paid >= target and target > Decimal('0.00'):
-            self.status = 'paid'
-        elif paid > Decimal('0.00'):
-            self.status = 'pending'
+        self.amount_paid = (self.cash_amount or Decimal('0.00')) + (self.upi_amount or Decimal('0.00'))
+        if self.cash_amount > Decimal('0.00') and self.upi_amount > Decimal('0.00'):
+            self.payment_method = 'SPLIT'
+        elif self.cash_amount > Decimal('0.00'):
+            self.payment_method = 'CASH'
         else:
-            self.status = 'no_advance'
-
+            self.payment_method = 'UPI'
+        self.pending_advance = max(Decimal('0.00'), (self.agreement_advance or Decimal('0.00')) - self.amount_paid)
         super().save(*args, **kwargs)
 
 
@@ -169,52 +153,40 @@ class ElectricityReading(models.Model):
 
 
 class RentDetail(models.Model):
-    PAYMENT_METHOD_CHOICES = [
-        ('UPI', 'UPI'),
-        ('CASH', 'CASH'),
-    ]
-
-    room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='rent_records')
-    tenant = models.ForeignKey(Tenant, on_delete=models.SET_NULL, null=True, blank=True, related_name='rent_records')
+    room = models.ForeignKey('Room', on_delete=models.CASCADE, related_name='rent_records')
+    tenant = models.ForeignKey('Tenant', on_delete=models.SET_NULL, null=True, blank=True)
     month = models.DateField()
     rent_amount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
     maintenance_charge = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
     electricity_charge = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
     last_month_balance = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
-    total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    
+    # Payment breakdown
+    cash_amount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    upi_amount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
     paid_amount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
-    payment_method = models.CharField(max_length=10, choices=PAYMENT_METHOD_CHOICES, default='UPI')
+    payment_method = models.CharField(max_length=20, default='UPI')
     collection_date = models.DateField(null=True, blank=True)
+    
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    current_balance_due = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
     is_paid = models.BooleanField(default=False)
 
-    class Meta:
-        unique_together = ('room', 'month')
-
-    def __str__(self):
-        return f"{self.room.room_number} - {self.month.strftime('%b %Y')}"
-
-    @property
-    def current_balance_due(self):
-        """Current cycle balance: Total Bill - Paid Amount"""
-        total = self.total_amount or Decimal('0.00')
-        paid = self.paid_amount or Decimal('0.00')
-        return max(Decimal('0.00'), total - paid)
-
-    def calculate_total_bill(self):
-        r = Decimal(str(self.rent_amount or 0))
-        eb = Decimal(str(self.electricity_charge or 0))
-        m = Decimal(str(self.maintenance_charge or 0))
-        prev_bal = Decimal(str(self.last_month_balance or 0))
-
-        balance_to_add = max(Decimal('0.00'), prev_bal)
-        self.total_amount = r + eb + m + balance_to_add
-        return self.total_amount
-
     def save(self, *args, **kwargs):
-        if not self.tenant and self.room:
-            self.tenant = self.room.current_tenant
-        self.calculate_total_bill()
-        self.is_paid = (Decimal(str(self.paid_amount or 0)) >= self.total_amount and self.total_amount > Decimal('0.00'))
+        self.paid_amount = (self.cash_amount or Decimal('0.00')) + (self.upi_amount or Decimal('0.00'))
+        if self.cash_amount > Decimal('0.00') and self.upi_amount > Decimal('0.00'):
+            self.payment_method = 'SPLIT'
+        elif self.cash_amount > Decimal('0.00'):
+            self.payment_method = 'CASH'
+        else:
+            self.payment_method = 'UPI'
+
+        self.total_amount = (self.rent_amount or Decimal('0.00')) + \
+                            (self.maintenance_charge or Decimal('0.00')) + \
+                            (self.electricity_charge or Decimal('0.00')) + \
+                            (self.last_month_balance or Decimal('0.00'))
+        self.current_balance_due = max(Decimal('0.00'), self.total_amount - self.paid_amount)
+        self.is_paid = (self.current_balance_due == Decimal('0.00'))
         super().save(*args, **kwargs)
 class MonthlyExpense(models.Model):
     month = models.CharField(max_length=20, default="Nov 2026") # e.g., 'Nov 2026'

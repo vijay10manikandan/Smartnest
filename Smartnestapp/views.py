@@ -278,9 +278,7 @@ def safe_maintenance_breakdown(room):
     try:
         from .models import get_room_maintenance_breakdown
         res = get_room_maintenance_breakdown(room)
-        if isinstance(res, (tuple, list)):
-            return res[0]
-        return res
+        return res[0] if isinstance(res, (tuple, list)) else res
     except Exception:
         return Decimal('0.00')
 
@@ -289,49 +287,34 @@ def rent_details_view(request):
     today = date.today()
     current_month = today.replace(day=1)
 
-    # 1. Update Rent Payment via POST
+    # 1. Update Rent Payment (Cash & UPI Split)
     if request.method == 'POST' and 'update_rent_payment' in request.POST:
-        room_id = request.POST.get('room_id')
-        collected_amount = Decimal(str(request.POST.get('amount_paid', '0.00') or 0))
+        rent_record_id = request.POST.get('rent_record_id')
+        cash_paid = Decimal(str(request.POST.get('cash_amount', '0.00') or 0))
+        upi_paid = Decimal(str(request.POST.get('upi_amount', '0.00') or 0))
         collection_date_str = request.POST.get('collection_date')
         collection_date = date.fromisoformat(collection_date_str) if collection_date_str else today
-        payment_method = request.POST.get('payment_method', 'UPI')
 
-        room = get_object_or_404(Room, id=room_id)
-        latest_elec = room.electricity_readings.filter(month_year=current_month).first()
-        elec_amount = latest_elec.total_electricity_amount if latest_elec else Decimal('0.00')
-        maint_amount = safe_maintenance_breakdown(room)
+        rent_record = get_object_or_404(RentDetail, id=rent_record_id)
+        rent_record.cash_amount = cash_paid
+        rent_record.upi_amount = upi_paid
+        rent_record.collection_date = collection_date
+        rent_record.save()
 
-        rent_record, created = RentDetail.objects.get_or_create(
-            room=room,
-            month=current_month,
-            defaults={
-                'tenant': getattr(room, 'current_tenant', None),
-                'rent_amount': getattr(room, 'monthly_rent', Decimal('0.00')),
-                'electricity_charge': elec_amount,
-                'maintenance_charge': maint_amount,
-                'paid_amount': collected_amount,
-                'collection_date': collection_date,
-                'last_month_balance': Decimal('0.00'),
-                'payment_method': payment_method,
-            }
-        )
-
-        if not created:
-            rent_record.tenant = getattr(room, 'current_tenant', None)
-            rent_record.rent_amount = getattr(room, 'monthly_rent', Decimal('0.00'))
-            rent_record.maintenance_charge = maint_amount
-            if rent_record.electricity_charge != Decimal('0.00'):
-                rent_record.electricity_charge = elec_amount
-            rent_record.paid_amount = collected_amount
-            rent_record.collection_date = collection_date
-            rent_record.payment_method = payment_method
-            rent_record.save()
-
-        messages.success(request, f"Updated Room {room.room_number}: Collected ₹{collected_amount} via {payment_method}")
+        messages.success(request, f"Room {rent_record.room.room_number}: Collected Cash ₹{cash_paid}, UPI ₹{upi_paid}")
         return redirect('rent_details')
 
-    # 2. Gather Building Data
+    # 2. Update Editable Electricity directly from table
+    if request.method == 'POST' and 'update_electricity' in request.POST:
+        rent_record_id = request.POST.get('rent_record_id')
+        new_eb = Decimal(str(request.POST.get('electricity_charge', '0.00') or 0))
+        rent_record = get_object_or_404(RentDetail, id=rent_record_id)
+        rent_record.electricity_charge = new_eb
+        rent_record.save()
+        messages.success(request, f"Updated Room {rent_record.room.room_number} Electricity to ₹{new_eb}")
+        return redirect('rent_details')
+
+    # 3. Gather Building & Rooms Data
     all_rooms = Room.objects.select_related('building').prefetch_related('electricity_readings', 'rent_records').all()
     tenant_rooms_map = {}
     room_data_cache = {}
@@ -357,16 +340,10 @@ def rent_details_view(request):
         if not created:
             rent_record.rent_amount = getattr(r, 'monthly_rent', Decimal('0.00'))
             rent_record.maintenance_charge = maint_cost
-            if rent_record.electricity_charge != Decimal('0.00'):
+            # Preserve Nil or manually edited electricity
+            if rent_record.electricity_charge is None:
                 rent_record.electricity_charge = elec_cost
             rent_record.save()
-
-        # Retrieve balances safely
-        pending_balance = getattr(rent_record, 'current_balance_due', None)
-        if pending_balance is None:
-            tot = getattr(rent_record, 'total_amount', Decimal('0.00')) or Decimal('0.00')
-            paid = getattr(rent_record, 'paid_amount', Decimal('0.00')) or Decimal('0.00')
-            pending_balance = max(Decimal('0.00'), tot - paid)
 
         t_name = getattr(tenant, 'primary_name', None) or getattr(tenant, 'name', '')
         t_phone = getattr(tenant, 'phone_number', None) or getattr(tenant, 'phone', '')
@@ -379,10 +356,12 @@ def rent_details_view(request):
             'rent': rent_record.rent_amount,
             'maintenance': rent_record.maintenance_charge,
             'electricity': rent_record.electricity_charge,
-            'total': getattr(rent_record, 'total_amount', Decimal('0.00')),
-            'collected': getattr(rent_record, 'paid_amount', Decimal('0.00')),
-            'pending': pending_balance,
-            'payment_method': getattr(rent_record, 'payment_method', ''),
+            'total': rent_record.total_amount,
+            'collected': rent_record.paid_amount,
+            'cash_amount': rent_record.cash_amount,
+            'upi_amount': rent_record.upi_amount,
+            'pending': rent_record.current_balance_due,
+            'payment_method': rent_record.payment_method,
             'rent_record': rent_record,
         }
         room_data_cache[r.id] = info
@@ -392,6 +371,7 @@ def rent_details_view(request):
             tenant_rooms_map.setdefault(key, []).append(info)
 
     building_data = []
+    all_modal_records = []
     for b in Building.objects.all():
         rooms_info = []
         for r in [rm for rm in all_rooms if rm.building_id == b.id]:
@@ -401,13 +381,13 @@ def rent_details_view(request):
             t_name = info['tenant_name']
             t_phone = info['tenant_phone']
             is_multi = False
-
             if t_name and t_phone:
                 t_key = (str(t_name).strip().lower(), str(t_phone).strip())
                 is_multi = len(tenant_rooms_map.get(t_key, [])) > 1
 
             info['is_multi_room'] = is_multi
             rooms_info.append(info)
+            all_modal_records.append(info)
 
         building_data.append({
             'building': b,
@@ -416,25 +396,18 @@ def rent_details_view(request):
 
     return render(request, 'Smartnestapp/rent_details.html', {
         'building_data': building_data,
+        'all_modal_records': all_modal_records,
         'billing_month': current_month
     })
-
 
 @login_required
 def set_eb_nil(request, pk):
     if request.method == "POST":
         rent_record = get_object_or_404(RentDetail, pk=pk)
-        
-        # Zero out electricity using the exact model field name
         rent_record.electricity_charge = Decimal('0.00')
-        rent_record.save()  # Triggers calculate_total_bill, updating total_amount & current_balance_due
-        
-        return JsonResponse({
-            "success": True,
-            "total_amount": float(rent_record.total_amount),
-            "pending_amount": float(rent_record.current_balance_due)
-        })
-    return JsonResponse({"success": False, "error": "Invalid request method"}, status=400)
+        rent_record.save()
+        return JsonResponse({"success": True})
+    return JsonResponse({"success": False, "error": "Invalid method"}, status=400)
 @login_required
 def get_single_bill(request, room_id):
     """Generates Single Bill with payment acknowledgement and remaining pending balance."""
@@ -866,57 +839,24 @@ def delete_tenant_view(request, tenant_id):
 
 @login_required
 def advance_details_view(request):
-    advances = AdvanceDetail.objects.select_related('room', 'room__building', 'tenant').all().order_by('room__room_number')
-    rooms = Room.objects.filter(is_vacant=False).select_related('building')
+    today = date.today()
+    if request.method == 'POST' and 'update_advance' in request.POST:
+        adv_id = request.POST.get('advance_id')
+        cash_paid = Decimal(str(request.POST.get('cash_amount', '0.00') or 0))
+        upi_paid = Decimal(str(request.POST.get('upi_amount', '0.00') or 0))
+        paid_date_str = request.POST.get('paid_date')
+        paid_date = date.fromisoformat(paid_date_str) if paid_date_str else today
 
-    # Handle "+ Record Advance" Modal submission
-    if request.method == 'POST' and 'record_advance_submit' in request.POST:
-        room_id = request.POST.get('room_id')
-        room = get_object_or_404(Room, id=room_id)
-        amount_paid = Decimal(str(request.POST.get('amount_paid', '0.00') or 0))
-        payment_method = request.POST.get('payment_method', 'UPI')
-        pay_date_str = request.POST.get('payment_date')
-        payment_date = date.fromisoformat(pay_date_str) if pay_date_str else date.today()
-
-        advance_record, _ = AdvanceDetail.objects.get_or_create(
-            room=room,
-            defaults={'tenant': room.current_tenant}
-        )
-        advance_record.tenant = room.current_tenant
-        advance_record.amount_paid = amount_paid
-        advance_record.payment_method = payment_method
-        advance_record.payment_date = payment_date
-        advance_record.save()  # Triggers automatic status calculation
-
-        messages.success(request, f"Advance recorded for Room {room.room_number} via {payment_method}!")
+        adv = get_object_or_404(AdvanceDetail, id=adv_id)
+        adv.cash_amount = cash_paid
+        adv.upi_amount = upi_paid
+        adv.paid_date = paid_date
+        adv.save()
+        messages.success(request, f"Updated advance for Room {adv.room.room_number}: Paid Cash ₹{cash_paid}, UPI ₹{upi_paid}")
         return redirect('advance_details')
 
-    # Bulk Save Handler (if editing inline rows)
-    if request.method == 'POST' and 'bulk_save_advances' in request.POST:
-        updated_count = 0
-        for adv in advances:
-            paid_str = request.POST.get(f'paid_{adv.id}')
-            method = request.POST.get(f'method_{adv.id}')
-            pay_date_str = request.POST.get(f'date_{adv.id}')
-
-            if paid_str is not None:
-                adv.amount_paid = Decimal(paid_str)
-            if method:
-                adv.payment_method = method
-            if pay_date_str:
-                adv.payment_date = date.fromisoformat(pay_date_str)
-
-            adv.save()  # Auto updates status
-            updated_count += 1
-
-        messages.success(request, f"Saved {updated_count} advance records to database!")
-        return redirect('advance_details')
-
-    return render(request, 'Smartnestapp/advance_details.html', {
-        'advances': advances,
-        'rooms': rooms,
-        'today_date': date.today().strftime('%Y-%m-%d'),
-    })
+    advances = AdvanceDetail.objects.select_related('room', 'tenant', 'room__building').all()
+    return render(request, 'Smartnestapp/advance_details.html', {'advances': advances, 'today': today})
 
 
 def edit_advance_view(request, advance_id=None):
