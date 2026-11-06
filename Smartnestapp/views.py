@@ -5,7 +5,7 @@ from .models import MonthlyExpense
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
-from django.db.models import Sum
+from django.db.models import Sum, Prefetch
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from .models import (
@@ -975,8 +975,14 @@ def pwa_manifest(request):
     return JsonResponse(manifest_data, content_type="application/manifest+json")
 
 def pwa_sw(request):
-    sw_code = "self.addEventListener('install', e => self.skipWaiting()); self.addEventListener('activate', e => clients.claim()); self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));"
-    return HttpResponse(sw_code, content_type="application/javascript")
+    js_content = (
+        "self.addEventListener('install', (e) => self.skipWaiting());\n"
+        "self.addEventListener('activate', (e) => clients.claim());\n"
+        "self.addEventListener('fetch', (e) => {\n"
+        "  e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));\n"
+        "});"
+    )
+    return HttpResponse(js_content, content_type="application/javascript")
 def set_eb_nil(request, pk):
     if request.method == "POST":
         rent_record = get_object_or_404(RentDetail, pk=pk)

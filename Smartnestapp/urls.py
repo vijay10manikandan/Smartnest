@@ -22,7 +22,7 @@ urlpatterns = [
     path('logout/', views.custom_logout_view, name='logout'),
     
     path('', views.dashboard_view, name='dashboard'),
-    
+    path('expenses/', views.expense_details_view, name='expense_details'),
     # Rent Details
     path('rooms/', views.room_details_view, name='room_details'),
     path('rent-details/', views.rent_details_view, name='rent_details'),
