@@ -46,14 +46,25 @@ class TenantForm(forms.ModelForm):
 class AdvanceDetailForm(forms.ModelForm):
     class Meta:
         model = AdvanceDetail
-        fields = ['room', 'tenant', 'amount_paid', 'payment_method', 'payment_date', 'is_active']
+        fields = [
+            'room',
+            'tenant',
+            'agreement_advance',
+            'cash_amount',
+            'upi_amount',
+            'amount_paid',
+            'paid_date',           # Changed from payment_date
+            'pending_advance',
+        ]
         widgets = {
             'room': forms.Select(attrs={'class': 'form-select'}),
             'tenant': forms.Select(attrs={'class': 'form-select'}),
+            'agreement_advance': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'cash_amount': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'upi_amount': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
             'amount_paid': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
-            'payment_method': forms.Select(attrs={'class': 'form-select'}),
-            'payment_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'paid_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),  # Changed from payment_date
+            'pending_advance': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'readonly': 'readonly'}),
         }
 
 
