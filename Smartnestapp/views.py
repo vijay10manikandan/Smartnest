@@ -270,37 +270,45 @@ def room_details_view(request):
 # ==============================================================================
 
 # Smartnestapp/views.py
+def extract_numeric_by_keywords(instance, keywords):
+    """
+    Scans all database fields on a model instance for matching keywords
+    and returns the first positive Decimal value found.
+    """
+    if not instance:
+        return Decimal('0.00')
+    
+    for field in instance._meta.fields:
+        fname = field.name.lower()
+        if any(kw in fname for kw in keywords):
+            val = getattr(instance, field.name, None)
+            if val is not None and str(val).strip() != '':
+                try:
+                    d = Decimal(str(val))
+                    if d > Decimal('0.00'):
+                        return d
+                except Exception:
+                    pass
+    return Decimal('0.00')
+
+
 def get_room_maint_value(room):
     """
-    Search Room attributes, Tenant attributes, and model functions
-    to extract the actual maintenance charge configured in Room Details.
+    Auto-detects maintenance across Room fields, Building fields,
+    and attached Tenant fields.
     """
-    # 1. Check direct Room attributes
-    for attr in [
-        'maintenance_charge', 'maintenance_amount', 'maintenance', 
-        'maint_charge', 'monthly_maintenance', 'maintenance_fee'
-    ]:
-        val = getattr(room, attr, None)
-        if val is not None and str(val).strip() != '':
-            try:
-                d_val = Decimal(str(val))
-                if d_val > Decimal('0.00'):
-                    return d_val
-            except Exception:
-                pass
+    # 1. Check Room fields (matches 'maintenance', 'maint_cost', 'monthly_maintenance', etc.)
+    val = extract_numeric_by_keywords(room, ['maint'])
+    if val > Decimal('0.00'):
+        return val
 
-    # 2. Check if a model calculation method exists on Room
-    for method_name in ['get_maintenance', 'get_maintenance_charge', 'calculate_maintenance']:
-        method = getattr(room, method_name, None)
-        if callable(method):
-            try:
-                res = method()
-                if res:
-                    return Decimal(str(res[0] if isinstance(res, (tuple, list)) else res))
-            except Exception:
-                pass
+    # 2. Check Building fields (if maintenance is defined per building)
+    if getattr(room, 'building', None):
+        val = extract_numeric_by_keywords(room.building, ['maint'])
+        if val > Decimal('0.00'):
+            return val
 
-    # 3. Check helper from models.py if imported
+    # 3. Check helper method if defined in models
     try:
         from .models import get_room_maintenance_breakdown
         res = get_room_maintenance_breakdown(room)
@@ -314,37 +322,19 @@ def get_room_maint_value(room):
 
 def get_room_target_advance(room):
     """
-    Search Room and attached Tenant attributes to locate the Target Advance amount.
+    Auto-detects Target Advance across Room and attached Tenant fields.
     """
-    # 1. Search directly on Room
-    for attr in [
-        'target_advance', 'agreement_advance', 'advance_target', 
-        'advance_amount', 'target_deposit', 'security_deposit', 'advance'
-    ]:
-        val = getattr(room, attr, None)
-        if val is not None and str(val).strip() != '':
-            try:
-                d_val = Decimal(str(val))
-                if d_val > Decimal('0.00'):
-                    return d_val
-            except Exception:
-                pass
+    # 1. Check Room fields (matches 'target_advance', 'advance', 'deposit', 'target_deposit', etc.)
+    val = extract_numeric_by_keywords(room, ['advance', 'deposit', 'target'])
+    if val > Decimal('0.00'):
+        return val
 
-    # 2. Search on the Current Tenant attached to this room
+    # 2. Check Tenant fields
     tenant = getattr(room, 'current_tenant', None)
     if tenant:
-        for attr in [
-            'target_advance', 'agreement_advance', 'advance_amount', 
-            'advance_target', 'advance', 'security_deposit'
-        ]:
-            val = getattr(tenant, attr, None)
-            if val is not None and str(val).strip() != '':
-                try:
-                    d_val = Decimal(str(val))
-                    if d_val > Decimal('0.00'):
-                        return d_val
-                except Exception:
-                    pass
+        val = extract_numeric_by_keywords(tenant, ['advance', 'deposit', 'target', 'agreement'])
+        if val > Decimal('0.00'):
+            return val
 
     return Decimal('0.00')
 
@@ -403,7 +393,7 @@ def rent_details_view(request):
             }
         )
 
-        # Force sync rent and maintenance directly from Room model
+        # Force sync rent and maintenance
         rent_record.tenant = tenant
         rent_record.rent_amount = getattr(r, 'monthly_rent', Decimal('0.00'))
         rent_record.maintenance_charge = maint_cost
@@ -947,15 +937,13 @@ def advance_details_view(request):
                 'agreement_advance': target_adv,
             }
         )
-        # Force overwrite agreement_advance if a non-zero target exists
-        if target_adv > Decimal('0.00'):
-            adv_obj.agreement_advance = target_adv
+        # Always update agreement advance from the detected value
+        adv_obj.agreement_advance = target_adv
         adv_obj.tenant = getattr(rm, 'current_tenant', None)
         
-        # Calculate Pending Advance = Agreement Advance - Paid Advance
         tot_paid = (adv_obj.cash_amount or Decimal('0.00')) + (adv_obj.upi_amount or Decimal('0.00'))
         adv_obj.amount_paid = tot_paid
-        adv_obj.pending_advance = max(Decimal('0.00'), (adv_obj.agreement_advance or Decimal('0.00')) - tot_paid)
+        adv_obj.pending_advance = max(Decimal('0.00'), adv_obj.agreement_advance - tot_paid)
         adv_obj.save()
 
     advances = AdvanceDetail.objects.select_related('room', 'tenant', 'room__building').all().order_by('room__room_number')
