@@ -45,7 +45,7 @@
                             <!-- 2. Tenant -->
                             <td>
                                 <div class="fw-bold text-dark">
-                                    {{ info.tenant.primary_name|default:info.tenant.name|default:"Vacant" }}
+                                    {{ info.tenant_name|default:"Vacant" }}
                                 </div>
                                 {% if info.is_multi_room %}
                                     <span class="badge bg-warning text-dark" style="font-size: 0.7rem;">Multi-Room Owner</span>
@@ -76,7 +76,7 @@
                             <!-- 6. Total -->
                             <td class="fw-bold">₹{{ info.total }}</td>
 
-                            <!-- 7. Collected with Pencil Edit Modal -->
+                            <!-- 7. Collected with Breakdown & Edit Modal -->
                             <td>
                                 <div class="d-flex align-items-center gap-1">
                                     <span class="fw-bold text-success">₹{{ info.collected }}</span>
@@ -84,7 +84,12 @@
                                         ✏️
                                     </button>
                                 </div>
-                                {% if info.payment_method %}
+                                {% if info.payment_method == 'SPLIT' %}
+                                    <div style="font-size: 0.68rem;" class="text-muted mt-1">
+                                        <span class="badge bg-primary">UPI: ₹{{ info.upi_amount|default:"0.00" }}</span>
+                                        <span class="badge bg-secondary">Cash: ₹{{ info.cash_amount|default:"0.00" }}</span>
+                                    </div>
+                                {% elif info.payment_method %}
                                     <span class="badge bg-secondary" style="font-size: 0.68rem;">{{ info.payment_method }}</span>
                                 {% endif %}
                             </td>
@@ -97,14 +102,14 @@
                             <!-- 9. Actions (WhatsApp & Eye Preview) -->
                             <td>
                                 <div class="d-flex align-items-center gap-1">
-                                    {% if info.tenant %}
-                                    <a href="https://api.whatsapp.com/send?phone=91{{ info.tenant.phone_number|default:info.tenant.phone }}&text=Dear%20{{ info.tenant.primary_name|default:info.tenant.name }},%20Your%20Rent%20Bill%20for%20Room%20{{ info.room.room_number }}:%20Rent:₹{{ info.rent }},%20Maintenance:₹{{ info.maintenance }},%20EB:₹{{ info.electricity }},%20Total:₹{{ info.total }},%20Pending:₹{{ info.pending }}." 
+                                    {% if info.tenant_phone %}
+                                    <a href="https://api.whatsapp.com/send?phone=91{{ info.tenant_phone }}&text=Dear%20{{ info.tenant_name }},%20Your%20Rent%20Bill%20for%20Room%20{{ info.room.room_number }}:%20Total%20Bill:₹{{ info.total }},%20Paid:₹{{ info.collected }},%20Pending:₹{{ info.pending }}." 
                                        target="_blank" 
                                        class="btn btn-sm btn-success d-flex align-items-center gap-1 py-1">
                                         📲 WhatsApp
                                     </a>
                                     {% endif %}
-                                    <button type="button" class="btn btn-sm btn-outline-dark py-1" onclick="previewBill('{{ info.room.room_number }}', '{{ info.tenant.primary_name|default:info.tenant.name|default:\"\" }}', '{{ info.rent }}', '{{ info.maintenance }}', '{{ info.electricity }}', '{{ info.total }}', '{{ info.pending }}')">
+                                    <button type="button" class="btn btn-sm btn-outline-dark py-1" onclick="previewBill('{{ info.room.room_number }}', '{{ info.tenant_name }}', '{{ info.rent }}', '{{ info.maintenance }}', '{{ info.electricity }}', '{{ info.total }}', '{{ info.pending }}')">
                                         👁️
                                     </button>
                                 </div>
@@ -123,20 +128,22 @@
                                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                     </div>
                                     <div class="modal-body">
-                                        <div class="mb-3">
-                                            <label class="form-label fw-bold">Amount Paid (₹)</label>
-                                            <input type="number" step="0.01" name="amount_paid" class="form-control" value="{{ info.collected }}" required>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label fw-bold">Payment Method</label>
-                                            <select name="payment_method" class="form-select">
-                                                <option value="UPI" {% if info.payment_method == 'UPI' %}selected{% endif %}>UPI</option>
-                                                <option value="CASH" {% if info.payment_method == 'CASH' %}selected{% endif %}>CASH</option>
-                                            </select>
+                                        <div class="row g-2 mb-3">
+                                            <div class="col-6">
+                                                <label class="form-label fw-bold text-primary">UPI Paid (₹)</label>
+                                                <input type="number" step="0.01" name="upi_amount" class="form-control" value="{{ info.upi_amount|default:'0.00' }}">
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-label fw-bold text-secondary">Cash Paid (₹)</label>
+                                                <input type="number" step="0.01" name="cash_amount" class="form-control" value="{{ info.cash_amount|default:'0.00' }}">
+                                            </div>
                                         </div>
                                         <div class="mb-3">
                                             <label class="form-label fw-bold">Collection Date</label>
                                             <input type="date" name="collection_date" class="form-control" value="{{ info.rent_record.collection_date|date:'Y-m-d'|default:billing_month|date:'Y-m-d' }}">
+                                        </div>
+                                        <div class="p-2 rounded bg-light border small text-muted">
+                                            Total Bill: <strong>₹{{ info.total }}</strong>. The remaining balance automatically moves to <strong>Pending</strong>.
                                         </div>
                                     </div>
                                     <div class="modal-footer">
