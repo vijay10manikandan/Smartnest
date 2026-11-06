@@ -294,61 +294,82 @@ def extract_numeric_by_keywords(instance, keywords):
 
 def get_room_maint_value(room):
     """
-    Computes maintenance matching Room Details:
-    - If 'Per Member' is chosen: total_persons * rate
-    - If 'Per Room' is chosen: fixed rate
+    Calculates maintenance based on Room Details modify settings:
+    - If Per Member: total_no_of_persons * rate
+    - If Per Room: rate
     """
-    if hasattr(room, 'calculate_maintenance') and callable(room.calculate_maintenance):
-        val = room.calculate_maintenance()
-        if val is not None and val > Decimal('0.00'):
-            return val
+    if not room:
+        return Decimal('0.00')
 
-    # Direct attribute inspection if fields have custom names
+    # 1. Fetch Maintenance Rate / Amount configured in Room Details
     rate = Decimal('0.00')
-    for rate_attr in ['maintenance_rate', 'maintenance_charge', 'maintenance_amount', 'maintenance']:
-        val = getattr(room, rate_attr, None)
+    for attr in [
+        'maintenance_rate', 'maintenance_charge', 'maintenance_amount', 
+        'maintenance', 'maint_rate', 'monthly_maintenance'
+    ]:
+        val = getattr(room, attr, None)
         if val is not None and str(val).strip() != '':
             try:
                 rate = Decimal(str(val))
                 if rate > Decimal('0.00'):
                     break
-            except Exception:
+            except (ValueError, TypeError):
                 pass
 
-    # Detect per-member vs per-room toggle
-    mode = ''
-    for type_attr in ['maintenance_type', 'maintenance_mode', 'maint_type', 'charge_type']:
+    # 2. Determine whether 'Per Member' or 'Per Room' is selected
+    # Checks common radio/select field names and boolean flags
+    is_per_member = False
+    for type_attr in [
+        'maintenance_type', 'maintenance_mode', 'maint_type', 
+        'billing_type', 'calc_type', 'maintenance_basis'
+    ]:
         val = getattr(room, type_attr, None)
         if val:
-            mode = str(val).strip().upper()
+            val_str = str(val).strip().lower()
+            if any(term in val_str for term in ['member', 'person', 'per_member', 'per_person', 'head']):
+                is_per_member = True
+                break
+
+    # Also check if boolean flag was used (e.g. is_per_member = True)
+    for bool_attr in ['is_per_member', 'per_member', 'by_member', 'per_person']:
+        val = getattr(room, bool_attr, None)
+        if isinstance(val, bool) and val:
+            is_per_member = True
             break
 
-    # Determine person count
+    # 3. If 'Per Room', return the base rate directly
+    if not is_per_member:
+        return rate
+
+    # 4. If 'Per Member', find total persons (from Room or Tenant)
     persons = 1
-    for count_attr in ['total_persons', 'no_of_persons', 'members_count', 'occupants_count']:
-        val = getattr(room, count_attr, None)
+    # Check persons on the Room itself
+    for p_attr in ['total_persons', 'no_of_persons', 'members_count', 'occupants_count', 'persons', 'members']:
+        val = getattr(room, p_attr, None)
         if val:
             try:
-                persons = int(val)
-                break
-            except Exception:
+                p_int = int(val)
+                if p_int > 0:
+                    persons = p_int
+                    break
+            except (ValueError, TypeError):
                 pass
 
+    # Check persons on current Tenant if not on Room
     tenant = getattr(room, 'current_tenant', None)
-    if tenant:
-        for t_attr in ['total_members', 'no_of_persons', 'members']:
-            val = getattr(tenant, t_attr, None)
+    if tenant and persons == 1:
+        for tp_attr in ['total_members', 'no_of_persons', 'members', 'occupants', 'members_count']:
+            val = getattr(tenant, tp_attr, None)
             if val:
                 try:
-                    persons = int(val)
-                    break
-                except Exception:
+                    p_int = int(val)
+                    if p_int > 0:
+                        persons = p_int
+                        break
+                except (ValueError, TypeError):
                     pass
 
-    if 'MEMBER' in mode or 'PERSON' in mode:
-        return rate * Decimal(str(persons))
-
-    return rate
+    return rate * Decimal(str(persons))
 
 
 def get_room_target_advance(room):
@@ -412,7 +433,7 @@ def rent_details_view(request):
         elec_cost = latest_elec.total_electricity_amount if latest_elec else Decimal('0.00')
         maint_cost = get_room_maint_value(r)
 
-        rent_record, created = RentDetail.objects.get_or_create(
+        rent_record, _ = RentDetail.objects.get_or_create(
             room=r,
             month=current_month,
             defaults={
@@ -424,12 +445,14 @@ def rent_details_view(request):
             }
         )
 
-        # Force sync maintenance directly from the room's calculated value
+        # Force sync calculated maintenance
         rent_record.tenant = tenant
         rent_record.rent_amount = getattr(r, 'monthly_rent', Decimal('0.00'))
         rent_record.maintenance_charge = maint_cost
         if rent_record.electricity_charge is None:
             rent_record.electricity_charge = elec_cost
+            
+        # Re-save to trigger model total recalculation
         rent_record.save()
 
         t_name = getattr(tenant, 'primary_name', None) or getattr(tenant, 'name', '')
@@ -1175,6 +1198,12 @@ def combined_bill_view(request, tenant_id):
     ]
 
     for r in rent_records:
+        # Pull live maintenance for each room
+        calc_maint = get_room_maint_value(r.room)
+        if calc_maint > Decimal('0.00') or r.maintenance_charge == Decimal('0.00'):
+            r.maintenance_charge = calc_maint
+            r.save()
+
         r_rent = r.rent_amount or Decimal('0.00')
         r_maint = r.maintenance_charge or Decimal('0.00')
         r_eb = r.electricity_charge or Decimal('0.00')
