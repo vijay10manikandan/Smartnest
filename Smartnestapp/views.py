@@ -1013,3 +1013,38 @@ def expense_details_view(request):
         return redirect('expense_details')
 
     return render(request, 'Smartnestapp/expenses.html', {'expense': expense})
+@login_required
+def combined_bill_view(request, tenant_id):
+    current_month = date.today().replace(day=1)
+    tenant = get_object_or_404(Tenant, id=tenant_id)
+    
+    # Fetch all rent records for this tenant for current month
+    rent_records = RentDetail.objects.filter(
+        tenant=tenant,
+        month=current_month
+    ).select_related('room', 'room__building')
+    
+    # Calculate combined totals
+    total_rent = sum([r.rent_amount or Decimal('0.00') for r in rent_records])
+    total_maintenance = sum([r.maintenance_charge or Decimal('0.00') for r in rent_records])
+    total_electricity = sum([r.electricity_charge or Decimal('0.00') for r in rent_records])
+    grand_total = sum([r.total_amount or Decimal('0.00') for r in rent_records])
+    total_paid = sum([r.paid_amount or Decimal('0.00') for r in rent_records])
+    total_upi = sum([r.upi_amount or Decimal('0.00') for r in rent_records])
+    total_cash = sum([r.cash_amount or Decimal('0.00') for r in rent_records])
+    total_pending = sum([r.current_balance_due or Decimal('0.00') for r in rent_records])
+    
+    context = {
+        'tenant': tenant,
+        'rent_records': rent_records,
+        'billing_month': current_month,
+        'total_rent': total_rent,
+        'total_maintenance': total_maintenance,
+        'total_electricity': total_electricity,
+        'grand_total': grand_total,
+        'total_paid': total_paid,
+        'total_upi': total_upi,
+        'total_cash': total_cash,
+        'total_pending': total_pending,
+    }
+    return render(request, 'Smartnestapp/combined_bill.html', context)

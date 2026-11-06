@@ -28,6 +28,7 @@ urlpatterns = [
     path('rent-details/', views.rent_details_view, name='rent_details'),
     path('api/bill/single/<int:room_id>/', views.get_single_bill, name='get_single_bill'),
     path('api/bill/combined/<int:tenant_id>/', views.get_combined_bill, name='get_combined_bill'),
+    path('combined-bill/<int:tenant_id>/', views.combined_bill_view, name='combined_bill'),
     # Advance Details
     path('advance-details/', views.advance_details_view, name='advance_details'),
     path('advance-details/add/', views.edit_advance_view, name='add_advance'),
