@@ -19,8 +19,26 @@ class TenantAdmin(admin.ModelAdmin):
 
 @admin.register(AdvanceDetail)
 class AdvanceDetailAdmin(admin.ModelAdmin):
-    list_display = ('room', 'tenant', 'amount_paid', 'status', 'payment_date', 'balance_pending', 'is_active')
-    list_filter = ('status', 'room__building')
+    list_display = (
+        'room',
+        'tenant',
+        'agreement_advance',
+        'cash_amount',
+        'upi_amount',
+        'amount_paid',
+        'pending_advance',
+        'payment_method',
+        'paid_date',
+    )
+    list_filter = (
+        'payment_method',
+        'paid_date',
+    )
+    search_fields = (
+        'room__room_number',
+        'tenant__primary_name',
+        'tenant__name',
+    )
 
 @admin.register(ElectricityReading)
 class ElectricityReadingAdmin(admin.ModelAdmin):
