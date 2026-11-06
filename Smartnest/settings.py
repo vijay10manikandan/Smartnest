@@ -24,7 +24,12 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'your-local-fallback-secret-key')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    'smartnest-kbsl.onrender.com',
+    'localhost',
+    '127.0.0.1',
+    '*',
+]
 
 
 # Application definition
@@ -124,8 +129,8 @@ USE_I18N = True
 USE_TZ = True
 
 CSRF_TRUSTED_ORIGINS = [
+    'https://smartnest-kbsl.onrender.com',
     'https://*.onrender.com',
-    'https://smartnest.onrender.com',  # your specific service name
 ]
 
 # Ensure cookies work properly over Render's HTTPS proxy
