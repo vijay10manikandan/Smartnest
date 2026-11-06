@@ -34,14 +34,14 @@
                         <tr>
                             <td><strong>{{ adv.room.room_number }}</strong></td>
                             <td>{{ adv.room.building.name }}</td>
-                            <td>{{ adv.tenant.primary_name|default:adv.tenant.name|default:"Vacant" }}</td>
+                            <td>{{ adv.tenant.primary_name|default:"Vacant" }}</td>
                             <td>₹{{ adv.agreement_advance }}</td>
                             <td>
                                 <span class="fw-bold text-success">₹{{ adv.amount_paid }}</span>
                                 {% if adv.payment_method == 'SPLIT' %}
-                                    <div style="font-size: 0.65rem;">
-                                        <span class="badge bg-primary">UPI: ₹{{ adv.upi_amount }}</span>
-                                        <span class="badge bg-secondary">Cash: ₹{{ adv.cash_amount }}</span>
+                                    <div style="font-size: 0.65rem;" class="mt-1">
+                                        <span class="badge bg-primary">UPI: ₹{{ adv.upi_amount|default:"0.00" }}</span>
+                                        <span class="badge bg-secondary">Cash: ₹{{ adv.cash_amount|default:"0.00" }}</span>
                                     </div>
                                 {% elif adv.payment_method %}
                                     <span class="badge bg-secondary" style="font-size: 0.68rem;">{{ adv.payment_method }}</span>
