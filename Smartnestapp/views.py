@@ -855,7 +855,10 @@ def advance_details_view(request):
         return redirect('advance_details')
 
     advances = AdvanceDetail.objects.select_related('room', 'tenant', 'room__building').all().order_by('room__room_number')
-    return render(request, 'Smartnestapp/advance_details.html', {'advances': advances, 'today': today})
+    return render(request, 'Smartnestapp/advance_details.html', {
+        'advances': advances, 
+        'today': today
+    })
 
 
 def edit_advance_view(request, advance_id=None):

@@ -112,7 +112,7 @@
                                             👁️
                                         </button>
                                     </div>
-                                    {% if info.is_multi_room %}
+                                    {% if info.is_multi_room and info.tenant %}
                                     <a href="{% url 'combined_bill' info.tenant.id %}" class="btn btn-sm btn-primary py-0 px-1 mt-1 text-nowrap" style="font-size: 0.72rem;">
                                         ⭐ Combined Bill 📄
                                     </a>
