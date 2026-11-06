@@ -274,12 +274,22 @@ def room_details_view(request):
 # ==============================================================================
 
 # Smartnestapp/views.py
+def safe_maintenance_breakdown(room):
+    try:
+        from .models import get_room_maintenance_breakdown
+        res = get_room_maintenance_breakdown(room)
+        if isinstance(res, (tuple, list)):
+            return res[0]
+        return res
+    except Exception:
+        return Decimal('0.00')
+
 @login_required
 def rent_details_view(request):
     today = date.today()
     current_month = today.replace(day=1)
 
-    # 1. Update Rent Payment
+    # 1. Update Rent Payment via POST
     if request.method == 'POST' and 'update_rent_payment' in request.POST:
         room_id = request.POST.get('room_id')
         collected_amount = Decimal(str(request.POST.get('amount_paid', '0.00') or 0))
@@ -290,14 +300,14 @@ def rent_details_view(request):
         room = get_object_or_404(Room, id=room_id)
         latest_elec = room.electricity_readings.filter(month_year=current_month).first()
         elec_amount = latest_elec.total_electricity_amount if latest_elec else Decimal('0.00')
-        maint_amount, _ = get_room_maintenance_breakdown(room)
+        maint_amount = safe_maintenance_breakdown(room)
 
         rent_record, created = RentDetail.objects.get_or_create(
             room=room,
             month=current_month,
             defaults={
-                'tenant': room.current_tenant,
-                'rent_amount': room.monthly_rent,
+                'tenant': getattr(room, 'current_tenant', None),
+                'rent_amount': getattr(room, 'monthly_rent', Decimal('0.00')),
                 'electricity_charge': elec_amount,
                 'maintenance_charge': maint_amount,
                 'paid_amount': collected_amount,
@@ -308,10 +318,9 @@ def rent_details_view(request):
         )
 
         if not created:
-            rent_record.tenant = room.current_tenant
-            rent_record.rent_amount = room.monthly_rent
+            rent_record.tenant = getattr(room, 'current_tenant', None)
+            rent_record.rent_amount = getattr(room, 'monthly_rent', Decimal('0.00'))
             rent_record.maintenance_charge = maint_amount
-            # Preserve Nil if user explicitly set it to 0.00
             if rent_record.electricity_charge != Decimal('0.00'):
                 rent_record.electricity_charge = elec_amount
             rent_record.paid_amount = collected_amount
@@ -323,22 +332,22 @@ def rent_details_view(request):
         return redirect('rent_details')
 
     # 2. Gather Building Data
-    all_rooms = Room.objects.select_related('building').prefetch_related('tenants', 'electricity_readings', 'rent_records').all()
+    all_rooms = Room.objects.select_related('building').prefetch_related('electricity_readings', 'rent_records').all()
     tenant_rooms_map = {}
     room_data_cache = {}
 
     for r in all_rooms:
-        tenant = r.current_tenant
+        tenant = getattr(r, 'current_tenant', None)
         latest_elec = r.electricity_readings.filter(month_year=current_month).first()
         elec_cost = latest_elec.total_electricity_amount if latest_elec else Decimal('0.00')
-        maint_cost, _ = get_room_maintenance_breakdown(r)
+        maint_cost = safe_maintenance_breakdown(r)
 
         rent_record, created = RentDetail.objects.get_or_create(
             room=r,
             month=current_month,
             defaults={
                 'tenant': tenant,
-                'rent_amount': r.monthly_rent,
+                'rent_amount': getattr(r, 'monthly_rent', Decimal('0.00')),
                 'maintenance_charge': maint_cost,
                 'electricity_charge': elec_cost,
                 'last_month_balance': Decimal('0.00'),
@@ -346,31 +355,40 @@ def rent_details_view(request):
         )
 
         if not created:
-            rent_record.rent_amount = r.monthly_rent
+            rent_record.rent_amount = getattr(r, 'monthly_rent', Decimal('0.00'))
             rent_record.maintenance_charge = maint_cost
-            # Do NOT overwrite electricity if it was already marked as Nil (0.00)
             if rent_record.electricity_charge != Decimal('0.00'):
                 rent_record.electricity_charge = elec_cost
             rent_record.save()
 
-        pending_balance = rent_record.current_balance_due
+        # Retrieve balances safely
+        pending_balance = getattr(rent_record, 'current_balance_due', None)
+        if pending_balance is None:
+            tot = getattr(rent_record, 'total_amount', Decimal('0.00')) or Decimal('0.00')
+            paid = getattr(rent_record, 'paid_amount', Decimal('0.00')) or Decimal('0.00')
+            pending_balance = max(Decimal('0.00'), tot - paid)
+
+        t_name = getattr(tenant, 'primary_name', None) or getattr(tenant, 'name', '')
+        t_phone = getattr(tenant, 'phone_number', None) or getattr(tenant, 'phone', '')
 
         info = {
             'room': r,
             'tenant': tenant,
+            'tenant_name': t_name,
+            'tenant_phone': t_phone,
             'rent': rent_record.rent_amount,
             'maintenance': rent_record.maintenance_charge,
             'electricity': rent_record.electricity_charge,
-            'total': rent_record.total_amount,
-            'collected': rent_record.paid_amount,
+            'total': getattr(rent_record, 'total_amount', Decimal('0.00')),
+            'collected': getattr(rent_record, 'paid_amount', Decimal('0.00')),
             'pending': pending_balance,
-            'payment_method': rent_record.payment_method,
+            'payment_method': getattr(rent_record, 'payment_method', ''),
             'rent_record': rent_record,
         }
         room_data_cache[r.id] = info
 
-        if tenant and getattr(tenant, 'primary_name', None) and getattr(tenant, 'phone_number', None):
-            key = (tenant.primary_name.strip().lower(), str(tenant.phone_number).strip())
+        if t_name and t_phone:
+            key = (str(t_name).strip().lower(), str(t_phone).strip())
             tenant_rooms_map.setdefault(key, []).append(info)
 
     building_data = []
@@ -380,11 +398,12 @@ def rent_details_view(request):
             info = room_data_cache.get(r.id)
             if not info:
                 continue
-            tenant = info['tenant']
+            t_name = info['tenant_name']
+            t_phone = info['tenant_phone']
             is_multi = False
 
-            if tenant and getattr(tenant, 'primary_name', None) and getattr(tenant, 'phone_number', None):
-                t_key = (tenant.primary_name.strip().lower(), str(tenant.phone_number).strip())
+            if t_name and t_phone:
+                t_key = (str(t_name).strip().lower(), str(t_phone).strip())
                 is_multi = len(tenant_rooms_map.get(t_key, [])) > 1
 
             info['is_multi_room'] = is_multi
