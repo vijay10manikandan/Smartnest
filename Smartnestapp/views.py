@@ -268,7 +268,19 @@ def room_details_view(request):
 # ==============================================================================
 # 3. Rent Details View (Billing & Payment Collections)
 # ==============================================================================
+def get_tenant_member_count(tenant):
+    """
+    Counts only the comma-separated members listed in members_names.
+    """
+    if not tenant:
+        return 0
 
+    members_str = getattr(tenant, 'members_names', '') or ''
+    if members_str.strip():
+        members_list = [m.strip() for m in members_str.replace('\n', ',').split(',') if m.strip()]
+        return len(members_list)
+
+    return 0
 # Smartnestapp/views.py
 def extract_numeric_by_keywords(instance, keywords):
     """
@@ -294,8 +306,8 @@ def extract_numeric_by_keywords(instance, keywords):
 
 def get_room_maint_value(room):
     """
-    Computes maintenance using exact Room columns:
-    - If PER_MEMBER: total_members * maintenance_rate_per_member
+    Calculates Maintenance:
+    - If PER_MEMBER: total number of persons (from Tenant Details) * maintenance_rate_per_member
     - If PER_ROOM: maintenance_charges
     """
     if not room:
@@ -305,24 +317,11 @@ def get_room_maint_value(room):
 
     if m_type == 'PER_MEMBER':
         rate = Decimal(str(getattr(room, 'maintenance_rate_per_member', '0.00') or 0))
-        
-        # Determine number of persons/members from tenant or room
-        persons = 1
         tenant = getattr(room, 'current_tenant', None)
-        if tenant:
-            for attr in ['total_members', 'no_of_members', 'members_count', 'total_persons', 'members', 'occupants']:
-                t_val = getattr(tenant, attr, None)
-                if t_val:
-                    try:
-                        p = int(t_val)
-                        if p > 0:
-                            persons = p
-                            break
-                    except (ValueError, TypeError):
-                        pass
+        persons = get_tenant_member_count(tenant)
         return rate * Decimal(str(persons))
 
-    # Default is PER_ROOM
+    # Default: PER_ROOM
     return Decimal(str(getattr(room, 'maintenance_charges', '0.00') or 0))
 
 
