@@ -271,19 +271,81 @@ def room_details_view(request):
 
 # Smartnestapp/views.py
 def get_room_maint_value(room):
-    """Dynamically pull maintenance value from whichever field name Room uses."""
-    for attr in ['maintenance_charge', 'maintenance_amount', 'maintenance']:
+    """
+    Search Room attributes, Tenant attributes, and model functions
+    to extract the actual maintenance charge configured in Room Details.
+    """
+    # 1. Check direct Room attributes
+    for attr in [
+        'maintenance_charge', 'maintenance_amount', 'maintenance', 
+        'maint_charge', 'monthly_maintenance', 'maintenance_fee'
+    ]:
         val = getattr(room, attr, None)
-        if val is not None:
-            return Decimal(str(val))
+        if val is not None and str(val).strip() != '':
+            try:
+                d_val = Decimal(str(val))
+                if d_val > Decimal('0.00'):
+                    return d_val
+            except Exception:
+                pass
+
+    # 2. Check if a model calculation method exists on Room
+    for method_name in ['get_maintenance', 'get_maintenance_charge', 'calculate_maintenance']:
+        method = getattr(room, method_name, None)
+        if callable(method):
+            try:
+                res = method()
+                if res:
+                    return Decimal(str(res[0] if isinstance(res, (tuple, list)) else res))
+            except Exception:
+                pass
+
+    # 3. Check helper from models.py if imported
+    try:
+        from .models import get_room_maintenance_breakdown
+        res = get_room_maintenance_breakdown(room)
+        if res:
+            return Decimal(str(res[0] if isinstance(res, (tuple, list)) else res))
+    except Exception:
+        pass
+
     return Decimal('0.00')
 
+
 def get_room_target_advance(room):
-    """Dynamically pull target advance value from whichever field name Room uses."""
-    for attr in ['target_advance', 'agreement_advance', 'advance_amount', 'advance']:
+    """
+    Search Room and attached Tenant attributes to locate the Target Advance amount.
+    """
+    # 1. Search directly on Room
+    for attr in [
+        'target_advance', 'agreement_advance', 'advance_target', 
+        'advance_amount', 'target_deposit', 'security_deposit', 'advance'
+    ]:
         val = getattr(room, attr, None)
-        if val is not None:
-            return Decimal(str(val))
+        if val is not None and str(val).strip() != '':
+            try:
+                d_val = Decimal(str(val))
+                if d_val > Decimal('0.00'):
+                    return d_val
+            except Exception:
+                pass
+
+    # 2. Search on the Current Tenant attached to this room
+    tenant = getattr(room, 'current_tenant', None)
+    if tenant:
+        for attr in [
+            'target_advance', 'agreement_advance', 'advance_amount', 
+            'advance_target', 'advance', 'security_deposit'
+        ]:
+            val = getattr(tenant, attr, None)
+            if val is not None and str(val).strip() != '':
+                try:
+                    d_val = Decimal(str(val))
+                    if d_val > Decimal('0.00'):
+                        return d_val
+                except Exception:
+                    pass
+
     return Decimal('0.00')
 
 @login_required
@@ -861,8 +923,12 @@ def advance_details_view(request):
             paid_date = today
 
         adv = get_object_or_404(AdvanceDetail, id=adv_id)
-        # Always link and lock agreement_advance to room target advance
-        adv.agreement_advance = get_room_target_advance(adv.room)
+        
+        # Pull latest target advance from Room/Tenant
+        target_adv = get_room_target_advance(adv.room)
+        if target_adv > Decimal('0.00'):
+            adv.agreement_advance = target_adv
+
         adv.cash_amount = cash_paid
         adv.upi_amount = upi_paid
         adv.paid_date = paid_date
@@ -881,9 +947,15 @@ def advance_details_view(request):
                 'agreement_advance': target_adv,
             }
         )
-        # Unconditionally sync agreement_advance from room details target advance
-        adv_obj.agreement_advance = target_adv
+        # Force overwrite agreement_advance if a non-zero target exists
+        if target_adv > Decimal('0.00'):
+            adv_obj.agreement_advance = target_adv
         adv_obj.tenant = getattr(rm, 'current_tenant', None)
+        
+        # Calculate Pending Advance = Agreement Advance - Paid Advance
+        tot_paid = (adv_obj.cash_amount or Decimal('0.00')) + (adv_obj.upi_amount or Decimal('0.00'))
+        adv_obj.amount_paid = tot_paid
+        adv_obj.pending_advance = max(Decimal('0.00'), (adv_obj.agreement_advance or Decimal('0.00')) - tot_paid)
         adv_obj.save()
 
     advances = AdvanceDetail.objects.select_related('room', 'tenant', 'room__building').all().order_by('room__room_number')
