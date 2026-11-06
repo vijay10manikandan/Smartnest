@@ -983,15 +983,30 @@ def pwa_sw(request):
         "});"
     )
     return HttpResponse(js_content, content_type="application/javascript")
+@login_required
 def set_eb_nil(request, pk):
     if request.method == "POST":
         rent_record = get_object_or_404(RentDetail, pk=pk)
-        rent_record.electricity = 0
-        rent_record.total = rent_record.rent + rent_record.maintenance
-        rent_record.pending = rent_record.total - rent_record.collected
+        
+        # Zero out electricity
+        rent_record.electricity_amount = Decimal('0.00')
+        
+        # Recalculate total: Rent + Maintenance (excluding electricity)
+        rent_amt = rent_record.rent_amount or Decimal('0.00')
+        maint_amt = rent_record.maintenance_charge or Decimal('0.00')
+        paid_amt = rent_record.paid_amount or Decimal('0.00')
+        
+        rent_record.total_amount = rent_amt + maint_amt
+        rent_record.pending_amount = max(Decimal('0.00'), rent_record.total_amount - paid_amt)
+        rent_record.is_paid = (rent_record.pending_amount == Decimal('0.00'))
+        
         rent_record.save()
-        return JsonResponse({"success": True})
-    return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
+        return JsonResponse({
+            "success": True,
+            "total_amount": float(rent_record.total_amount),
+            "pending_amount": float(rent_record.pending_amount)
+        })
+    return JsonResponse({"success": False, "error": "Invalid request method"}, status=400)
 def expense_details_view(request):
     expense, _ = MonthlyExpense.objects.get_or_create(month="Nov 2026")
     

@@ -65,17 +65,18 @@
     </div>
     <div class="offcanvas-body p-0 d-flex flex-column">
         {% if user.is_authenticated %}
-            <a href="{% url 'dashboard' %}">📊 Dashboard</a>
-            <a href="{% url 'room_details' %}">🚪 Room Details</a>
-            <a href="{% url 'rent_details' %}">💰 Rent Details</a>
-            <a href="{% url 'advance_details' %}">💳 Advance Details</a>
-            <a href="{% url 'previous_month_reading' %}">🕒 Previous Month Reading</a>
-            <a href="{% url 'current_month_reading' %}">⚡ Current Month Reading</a>
-            <a href="{% url 'electricity' %}">⚡ Electricity</a>
-            <a href="{% url 'tenant_details' %}">👥 Tenant Details</a>
-            <a href="{% url 'expense_details' %}">💸 Expenses Details</a>
+            <!-- Inside desktop sidebar navigation -->
+            <a href="{% url 'dashboard' %}" class="nav-link text-white"><span class="me-2">📊</span> Dashboard</a>
+            <a href="{% url 'room_details' %}" class="nav-link text-white"><span class="me-2">🚪</span> Room Details</a>
+            <a href="{% url 'rent_details' %}" class="nav-link text-white"><span class="me-2">💰</span> Rent Details</a>
+            <a href="{% url 'advance_details' %}" class="nav-link text-white"><span class="me-2">💳</span> Advance Details</a>
+            <a href="{% url 'previous_month_reading' %}" class="nav-link text-white"><span class="me-2">🕒</span> Previous Month Reading</a>
+            <a href="{% url 'current_month_reading' %}" class="nav-link text-white"><span class="me-2">⚡</span> Current Month Reading</a>
+            <a href="{% url 'electricity' %}" class="nav-link text-white"><span class="me-2">⚡</span> Electricity</a>
+            <a href="{% url 'tenant_details' %}" class="nav-link text-white"><span class="me-2">👥</span> Tenant Details</a>
+            <a href="{% url 'expense_details' %}" class="nav-link text-white"><span class="me-2">💸</span> Expenses Details</a>
             <hr class="text-secondary my-2">
-            <a href="/admin/" target="_blank">⚙️ Admin Panel</a>
+            <a href="/admin/" target="_blank" class="nav-link text-white"><span class="me-2">⚙️</span> Admin Panel</a>
 
             <div class="mt-auto pt-3 border-top border-secondary">
                 <div class="px-3 py-1 text-light small opacity-75">
