@@ -317,7 +317,30 @@ def get_room_maint_value(room):
         return rate * Decimal(str(persons))
 
     return Decimal(str(getattr(room, 'maintenance_charges', '0.00') or 0))
+def recalculate_rent_record(rent_record, room=None, tenant=None, default_elec=Decimal('0.00')):
+    """Helper to cleanly compute totals and pending balance without overwriting manual overrides."""
+    if room:
+        rent_record.rent_amount = getattr(room, 'monthly_rent', Decimal('0.00'))
+        rent_record.maintenance_charge = get_room_maint_value(room)
+    if tenant is not None:
+        rent_record.tenant = tenant
+    if rent_record.electricity_charge is None:
+        rent_record.electricity_charge = default_elec
+    if rent_record.last_month_balance is None:
+        rent_record.last_month_balance = Decimal('0.00')
 
+    rent_record.total_amount = (
+        (rent_record.rent_amount or Decimal('0.00')) +
+        (rent_record.maintenance_charge or Decimal('0.00')) +
+        (rent_record.electricity_charge or Decimal('0.00')) +
+        (rent_record.last_month_balance or Decimal('0.00'))
+    )
+    rent_record.paid_amount = (
+        (rent_record.cash_amount or Decimal('0.00')) +
+        (rent_record.upi_amount or Decimal('0.00'))
+    )
+    rent_record.current_balance_due = max(Decimal('0.00'), rent_record.total_amount - rent_record.paid_amount)
+    rent_record.save()
 
 def get_room_target_advance(room):
     """Pulls target advance amount directly from Room model."""
@@ -336,54 +359,81 @@ def rent_details_view(request):
     today = date.today()
     current_month = today.replace(day=1)
 
-    # 1. Update Rent Payment (Cash & UPI Split)
-    if request.method == 'POST' and 'update_rent_payment' in request.POST:
+    if request.method == 'POST':
         rent_record_id = request.POST.get('rent_record_id')
-        cash_paid = Decimal(str(request.POST.get('cash_amount', '0.00') or 0))
-        upi_paid = Decimal(str(request.POST.get('upi_amount', '0.00') or 0))
-        collection_date_str = request.POST.get('collection_date')
-        collection_date = date.fromisoformat(collection_date_str) if collection_date_str else today
-
         rent_record = get_object_or_404(RentDetail, id=rent_record_id)
-        rent_record.cash_amount = cash_paid
-        rent_record.upi_amount = upi_paid
-        rent_record.collection_date = collection_date
-        rent_record.save()
 
-        messages.success(request, f"Room {rent_record.room.room_number}: Received Cash ₹{cash_paid}, UPI ₹{upi_paid}")
-        return redirect('rent_details')
+        # 1. Update Rent Payment (Cash & UPI Split)
+        if 'update_rent_payment' in request.POST:
+            cash_paid = Decimal(str(request.POST.get('cash_amount', '0.00') or 0))
+            upi_paid = Decimal(str(request.POST.get('upi_amount', '0.00') or 0))
+            collection_date_str = request.POST.get('collection_date')
+            collection_date = date.fromisoformat(collection_date_str) if collection_date_str else today
 
-    # 2. Update Electricity
-    if request.method == 'POST' and 'update_electricity' in request.POST:
-        rent_record_id = request.POST.get('rent_record_id')
-        new_eb = Decimal(str(request.POST.get('electricity_charge', '0.00') or 0))
-        rent_record = get_object_or_404(RentDetail, id=rent_record_id)
-        rent_record.electricity_charge = new_eb
-        rent_record.save()
-        messages.success(request, f"Updated Room {rent_record.room.room_number} Electricity to ₹{new_eb}")
-        return redirect('rent_details')
+            rent_record.cash_amount = cash_paid
+            rent_record.upi_amount = upi_paid
+            rent_record.collection_date = collection_date
+            recalculate_rent_record(rent_record)
+            messages.success(request, f"Room {rent_record.room.room_number}: Received Cash ₹{cash_paid}, UPI ₹{upi_paid}")
+            return redirect('rent_details')
 
-    # 3. Update Last Month Balance
-    if request.method == 'POST' and 'update_last_month_balance' in request.POST:
-        rent_record_id = request.POST.get('rent_record_id')
-        new_lmb = Decimal(str(request.POST.get('last_month_balance', '0.00') or 0))
-        rent_record = get_object_or_404(RentDetail, id=rent_record_id)
-        rent_record.last_month_balance = new_lmb
-        rent_record.save()
-        messages.success(request, f"Updated Room {rent_record.room.room_number} Last Month Balance to ₹{new_lmb}")
-        return redirect('rent_details')
+        # 2. Update Electricity
+        if 'update_electricity' in request.POST:
+            new_eb = Decimal(str(request.POST.get('electricity_charge', '0.00') or 0))
+            rent_record.electricity_charge = new_eb
+            recalculate_rent_record(rent_record)
+            messages.success(request, f"Updated Room {rent_record.room.room_number} Electricity to ₹{new_eb}")
+            return redirect('rent_details')
 
-    # 4. Update Pending Balance Manually
-    if request.method == 'POST' and 'update_pending_balance' in request.POST:
-        rent_record_id = request.POST.get('rent_record_id')
-        new_pending = Decimal(str(request.POST.get('current_balance_due', '0.00') or 0))
-        rent_record = get_object_or_404(RentDetail, id=rent_record_id)
-        rent_record.current_balance_due = new_pending
-        rent_record.save()
-        messages.success(request, f"Updated Room {rent_record.room.room_number} Pending Balance to ₹{new_pending}")
-        return redirect('rent_details')
+        # 3. Set Electricity to Nil (0)
+        if 'nil_electricity' in request.POST:
+            rent_record.electricity_charge = Decimal('0.00')
+            recalculate_rent_record(rent_record)
+            messages.success(request, f"Room {rent_record.room.room_number} Electricity set to Nil (₹0.00)")
+            return redirect('rent_details')
 
-    # 5. Gather All Rooms Data
+        # 4. Update Last Month Balance
+        if 'update_last_month_balance' in request.POST:
+            new_lmb = Decimal(str(request.POST.get('last_month_balance', '0.00') or 0))
+            rent_record.last_month_balance = new_lmb
+            recalculate_rent_record(rent_record)
+            messages.success(request, f"Updated Room {rent_record.room.room_number} Last Month Balance to ₹{new_lmb}")
+            return redirect('rent_details')
+
+        # 5. Set Last Month Balance to Nil (0)
+        if 'nil_last_month_balance' in request.POST:
+            rent_record.last_month_balance = Decimal('0.00')
+            recalculate_rent_record(rent_record)
+            messages.success(request, f"Room {rent_record.room.room_number} Last Month Balance set to Nil (₹0.00)")
+            return redirect('rent_details')
+
+        # 6. Update Pending Balance Manually
+        if 'update_pending_balance' in request.POST:
+            new_pending = Decimal(str(request.POST.get('current_balance_due', '0.00') or 0))
+            # Adjust total_amount so pending reflects the manual override accurately
+            rent_record.current_balance_due = new_pending
+            rent_record.total_amount = (rent_record.paid_amount or Decimal('0.00')) + new_pending
+            rent_record.save()
+            messages.success(request, f"Updated Room {rent_record.room.room_number} Pending Balance to ₹{new_pending}")
+            return redirect('rent_details')
+
+        # 7. Push Pending Balance into Last Month Balance
+        if 'push_pending_to_lmb' in request.POST:
+            pending_amt = rent_record.current_balance_due or Decimal('0.00')
+            if pending_amt > Decimal('0.00'):
+                # Shift pending amount into Last Month Balance and reset current charges/pending
+                rent_record.last_month_balance = (rent_record.last_month_balance or Decimal('0.00')) + pending_amt
+                # Mark current due as shifted by settling current bill to paid + LMB carry-forward
+                rent_record.rent_amount = Decimal('0.00')
+                rent_record.maintenance_charge = Decimal('0.00')
+                rent_record.electricity_charge = Decimal('0.00')
+                rent_record.total_amount = rent_record.last_month_balance
+                rent_record.current_balance_due = Decimal('0.00')
+                rent_record.save()
+                messages.success(request, f"Room {rent_record.room.room_number}: Pushed ₹{pending_amt} to Last Month Balance.")
+            return redirect('rent_details')
+
+    # Gather All Rooms Data
     all_rooms = Room.objects.select_related('building').prefetch_related('electricity_readings', 'rent_records').all()
     tenant_rooms_map = {}
     room_data_cache = {}
@@ -394,7 +444,7 @@ def rent_details_view(request):
         elec_cost = latest_elec.total_electricity_amount if latest_elec else Decimal('0.00')
         maint_cost = get_room_maint_value(r)
 
-        rent_record, _ = RentDetail.objects.get_or_create(
+        rent_record, created = RentDetail.objects.get_or_create(
             room=r,
             month=current_month,
             defaults={
@@ -406,28 +456,13 @@ def rent_details_view(request):
             }
         )
 
-        rent_record.tenant = tenant
-        rent_record.rent_amount = getattr(r, 'monthly_rent', Decimal('0.00'))
-        rent_record.maintenance_charge = maint_cost
-        if rent_record.electricity_charge is None:
-            rent_record.electricity_charge = elec_cost
-        if rent_record.last_month_balance is None:
-            rent_record.last_month_balance = Decimal('0.00')
-
-        # Calculate Total Bill
-        rent_record.total_amount = (rent_record.rent_amount or Decimal('0.00')) + \
-                                   (rent_record.maintenance_charge or Decimal('0.00')) + \
-                                   (rent_record.electricity_charge or Decimal('0.00')) + \
-                                   (rent_record.last_month_balance or Decimal('0.00'))
-        rent_record.paid_amount = (rent_record.cash_amount or Decimal('0.00')) + \
-                                  (rent_record.upi_amount or Decimal('0.00'))
-        rent_record.current_balance_due = max(Decimal('0.00'), rent_record.total_amount - rent_record.paid_amount)
-        rent_record.save()
+        # Only sync room rates if the record has not had its pending balance pushed
+        if created or not (rent_record.last_month_balance > Decimal('0.00') and rent_record.current_balance_due == Decimal('0.00') and rent_record.rent_amount == Decimal('0.00')):
+            recalculate_rent_record(rent_record, room=r, tenant=tenant, default_elec=elec_cost)
 
         t_name = getattr(tenant, 'primary_name', None) or getattr(tenant, 'name', '')
         t_phone = getattr(tenant, 'phone_number', None) or getattr(tenant, 'phone', '')
 
-        # Collection Date
         coll_date = rent_record.collection_date or today
         coll_date_str = coll_date.strftime("%d/%m/%Y")
         bill_date_str = current_month.strftime("%d/%m/%Y")
@@ -1176,6 +1211,7 @@ def combined_bill_view(request, tenant_id):
     total_paid = Decimal('0.00')
     total_upi = Decimal('0.00')
     total_cash = Decimal('0.00')
+    total_pending = Decimal('0.00')
 
     bill_date_str = current_month.strftime("%d/%m/%Y")
     whatsapp_lines = [
@@ -1184,21 +1220,14 @@ def combined_bill_view(request, tenant_id):
     ]
 
     for r in rent_records:
-        calc_maint = get_room_maint_value(r.room)
-        r.maintenance_charge = calc_maint
-        r.total_amount = (r.rent_amount or Decimal('0.00')) + \
-                         (r.maintenance_charge or Decimal('0.00')) + \
-                         (r.electricity_charge or Decimal('0.00')) + \
-                         (r.last_month_balance or Decimal('0.00'))
-        r.paid_amount = (r.cash_amount or Decimal('0.00')) + (r.upi_amount or Decimal('0.00'))
-        r.current_balance_due = max(Decimal('0.00'), r.total_amount - r.paid_amount)
-        r.save()
+        recalculate_rent_record(r, room=r.room)
 
         r_rent = r.rent_amount or Decimal('0.00')
         r_maint = r.maintenance_charge or Decimal('0.00')
         r_eb = r.electricity_charge or Decimal('0.00')
         r_lmb = r.last_month_balance or Decimal('0.00')
         r_tot = r.total_amount or Decimal('0.00')
+        r_pend = r.current_balance_due or Decimal('0.00')
 
         total_rent += r_rent
         total_maintenance += r_maint
@@ -1208,6 +1237,7 @@ def combined_bill_view(request, tenant_id):
         total_paid += (r.paid_amount or Decimal('0.00'))
         total_upi += (r.upi_amount or Decimal('0.00'))
         total_cash += (r.cash_amount or Decimal('0.00'))
+        total_pending += r_pend
 
         whatsapp_lines.append(f"Room No: {r.room.room_number}")
         whatsapp_lines.append(f"{r.room.room_number} Rent: ₹{r_rent}")
@@ -1217,6 +1247,7 @@ def combined_bill_view(request, tenant_id):
         whatsapp_lines.append(f"Subtotal: ₹{r_tot}")
 
     whatsapp_lines.append(f"Total Bill: ₹{grand_total}")
+    whatsapp_lines.append(f"Pending Balance: ₹{total_pending}")
     whatsapp_lines.append(f"Total Received: ₹{total_paid}")
     whatsapp_lines.append(f"Received via UPI: ₹{total_upi}")
     whatsapp_lines.append(f"Received via Cash: ₹{total_cash}")
@@ -1237,6 +1268,7 @@ def combined_bill_view(request, tenant_id):
         'total_paid': total_paid,
         'total_upi': total_upi,
         'total_cash': total_cash,
+        'total_pending': total_pending,
         'whatsapp_text_encoded': whatsapp_text_encoded,
     }
     return render(request, 'Smartnestapp/combined_bill.html', context)

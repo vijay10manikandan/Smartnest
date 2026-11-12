@@ -22,20 +22,19 @@
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover mb-0 align-middle">
+                <table class="table table-hover mb-0 align-middle text-nowrap">
                     <thead class="table-light">
                         <tr>
-                            <th style="min-width: 65px;">Room</th>
-                            <th style="min-width: 140px;">Tenant</th>
-                            <th>Rent</th>
-                            <th>Maintenance</th>
-                            <th style="min-width: 155px;">Electricity</th>
-                            <!-- New Last Month Balance Column before Total -->
-                            <th style="min-width: 175px;">Last Month Balance</th>
-                            <th>Total</th>
-                            <th style="min-width: 120px;">Collected</th>
-                            <th style="min-width: 170px;">Pending</th>
-                            <th style="min-width: 160px;">Action</th>
+                            <th style="width: 70px;">Room</th>
+                            <th style="min-width: 150px;">Tenant</th>
+                            <th style="min-width: 95px;">Rent</th>
+                            <th style="min-width: 110px;">Maintenance</th>
+                            <th style="min-width: 145px;">Electricity</th>
+                            <th style="min-width: 165px;">Last Month Bal.</th>
+                            <th style="min-width: 100px;">Total</th>
+                            <th style="min-width: 130px;">Collected</th>
+                            <th style="min-width: 155px;">Pending</th>
+                            <th style="min-width: 155px;">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -45,10 +44,10 @@
                             <td><strong>{{ info.room.room_number }}</strong></td>
 
                             <!-- 2. Tenant -->
-                            <td>
+                            <td class="text-wrap" style="min-width: 150px; max-width: 200px;">
                                 <div class="fw-bold text-dark">{{ info.tenant_name|default:"Vacant" }}</div>
                                 {% if info.is_multi_room %}
-                                    <span class="badge bg-warning text-dark" style="font-size: 0.7rem;">Multi-Room Owner</span>
+                                    <span class="badge bg-warning text-dark mt-1" style="font-size: 0.68rem;">Multi-Room Owner</span>
                                 {% endif %}
                             </td>
 
@@ -58,7 +57,7 @@
                             <!-- 4. Maintenance -->
                             <td>₹{{ info.maintenance }}</td>
 
-                            <!-- 5. Electricity with Edit & Nil Buttons -->
+                            <!-- 5. Electricity with Edit & Nil Form -->
                             <td>
                                 <div class="d-flex align-items-center gap-1">
                                     <span>₹{{ info.electricity|default:"0.00" }}</span>
@@ -66,14 +65,19 @@
                                         ✏️
                                     </button>
                                     {% if info.electricity and info.electricity > 0 %}
-                                    <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-1" style="font-size: 0.72rem;" onclick="makeEbNil('{{ info.rent_record.id }}')">
-                                        Nil
-                                    </button>
+                                    <form method="POST" class="d-inline m-0 p-0" onsubmit="return confirm('Set Electricity charges to Nil (₹0)?');">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="nil_electricity" value="1">
+                                        <input type="hidden" name="rent_record_id" value="{{ info.rent_record.id }}">
+                                        <button type="submit" class="btn btn-outline-secondary btn-sm py-0 px-1" style="font-size: 0.72rem;">
+                                            Nil
+                                        </button>
+                                    </form>
                                     {% endif %}
                                 </div>
                             </td>
 
-                            <!-- 6. Last Month Balance with Edit & Nil Buttons -->
+                            <!-- 6. Last Month Balance with Edit & Nil Form -->
                             <td>
                                 <div class="d-flex align-items-center gap-1">
                                     <span>₹{{ info.last_month_balance|default:"0.00" }}</span>
@@ -81,9 +85,14 @@
                                         ✏️
                                     </button>
                                     {% if info.last_month_balance and info.last_month_balance > 0 %}
-                                    <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-1" style="font-size: 0.72rem;" onclick="makeLmbNil('{{ info.rent_record.id }}')">
-                                        Nil
-                                    </button>
+                                    <form method="POST" class="d-inline m-0 p-0" onsubmit="return confirm('Set Last Month Balance to Nil (₹0)?');">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="nil_last_month_balance" value="1">
+                                        <input type="hidden" name="rent_record_id" value="{{ info.rent_record.id }}">
+                                        <button type="submit" class="btn btn-outline-secondary btn-sm py-0 px-1" style="font-size: 0.72rem;">
+                                            Nil
+                                        </button>
+                                    </form>
                                     {% endif %}
                                 </div>
                             </td>
@@ -91,7 +100,7 @@
                             <!-- 7. Total -->
                             <td class="fw-bold">₹{{ info.total }}</td>
 
-                            <!-- 8. Collected (Total Received) -->
+                            <!-- 8. Collected -->
                             <td>
                                 <div class="d-flex align-items-center gap-1">
                                     <span class="fw-bold text-success">₹{{ info.collected }}</span>
@@ -105,11 +114,11 @@
                                         <span class="badge bg-secondary">Cash: ₹{{ info.cash_amount }}</span>
                                     </div>
                                 {% elif info.payment_method %}
-                                    <span class="badge bg-secondary" style="font-size: 0.68rem;">{{ info.payment_method }}</span>
+                                    <span class="badge bg-secondary mt-1" style="font-size: 0.66rem;">{{ info.payment_method }}</span>
                                 {% endif %}
                             </td>
 
-                            <!-- 9. Pending Column with Edit Modal and Push Button -->
+                            <!-- 9. Pending with Edit Modal and Push Form -->
                             <td>
                                 <div class="d-flex align-items-center gap-1">
                                     <span class="fw-bold text-danger">₹{{ info.pending }}</span>
@@ -117,30 +126,35 @@
                                         ✏️
                                     </button>
                                     {% if info.pending and info.pending > 0 %}
-                                    <button type="button" class="btn btn-sm btn-outline-warning py-0 px-1 text-dark" style="font-size: 0.72rem;" title="Shift Pending to Last Month Balance" onclick="shiftPending('{{ info.rent_record.id }}')">
-                                        Push ⏩
-                                    </button>
+                                    <form method="POST" class="d-inline m-0 p-0" onsubmit="return confirm('Push ₹{{ info.pending }} into Last Month Balance?');">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="push_pending_to_lmb" value="1">
+                                        <input type="hidden" name="rent_record_id" value="{{ info.rent_record.id }}">
+                                        <button type="submit" class="btn btn-sm btn-warning py-0 px-1 text-dark fw-semibold" style="font-size: 0.72rem;" title="Shift Pending to Last Month Balance">
+                                            Push ⏩
+                                        </button>
+                                    </form>
                                     {% endif %}
                                 </div>
                             </td>
 
-                            <!-- 10. Actions (WhatsApp & Preview Receipt) -->
+                            <!-- 10. Actions (WhatsApp & Preview Receipt with Pending Balance) -->
                             <td>
                                 <div class="d-flex flex-column gap-1">
                                     <div class="d-flex align-items-center gap-1">
                                         {% if info.tenant_phone %}
-                                        <a href="https://api.whatsapp.com/send?phone=91{{ info.tenant_phone }}&text=Room%20Number:%20{{ info.room.room_number }}%0ADate:%20{{ info.bill_date }}%0ATenant%20Name:%20{{ info.tenant_name }}%0ARoom%20Rent:₹{{ info.rent }}%0AMaintenance:₹{{ info.maintenance }}%0AElectricity%20Charges:₹{{ info.electricity|default:'0.00' }}%0ALast%20Month%20Balance:₹{{ info.last_month_balance|default:'0.00' }}%0ATotal%20Bill:₹{{ info.total }}%0ATotal%20Received:₹{{ info.collected }}%0AReceived%20via%20UPI:₹{{ info.upi_amount|default:'0.00' }}%0AReceived%20via%20Cash:₹{{ info.cash_amount|default:'0.00' }}%0ACollection%20Date:%20{{ info.collection_date_str }}" 
+                                        <a href="https://api.whatsapp.com/send?phone=91{{ info.tenant_phone }}&text=Room%20Number:%20{{ info.room.room_number }}%0ADate:%20{{ info.bill_date }}%0ATenant%20Name:%20{{ info.tenant_name }}%0ARoom%20Rent:₹{{ info.rent }}%0AMaintenance:₹{{ info.maintenance }}%0AElectricity%20Charges:₹{{ info.electricity|default:'0.00' }}%0ALast%20Month%20Balance:₹{{ info.last_month_balance|default:'0.00' }}%0ATotal%20Bill:₹{{ info.total }}%0APending%20Balance:₹{{ info.pending|default:'0.00' }}%0ATotal%20Received:₹{{ info.collected }}%0AReceived%20via%20UPI:₹{{ info.upi_amount|default:'0.00' }}%0AReceived%20via%20Cash:₹{{ info.cash_amount|default:'0.00' }}%0ACollection%20Date:%20{{ info.collection_date_str }}" 
                                            target="_blank" 
-                                           class="btn btn-sm btn-success d-flex align-items-center gap-1 py-1 px-2" style="font-size: 0.8rem;">
+                                           class="btn btn-sm btn-success d-flex align-items-center gap-1 py-1 px-2" style="font-size: 0.78rem;">
                                             📲 WhatsApp
                                         </a>
                                         {% endif %}
-                                        <button type="button" class="btn btn-sm btn-outline-dark py-1 px-2" onclick="previewBill('{{ info.room.room_number }}', '{{ info.bill_date }}', '{{ info.tenant_name }}', '{{ info.rent }}', '{{ info.maintenance }}', '{{ info.electricity }}', '{{ info.last_month_balance }}', '{{ info.total }}', '{{ info.collected }}', '{{ info.upi_amount }}', '{{ info.cash_amount }}', '{{ info.collection_date_str }}')">
+                                        <button type="button" class="btn btn-sm btn-outline-dark py-1 px-2" onclick="previewBill('{{ info.room.room_number }}', '{{ info.bill_date }}', '{{ info.tenant_name }}', '{{ info.rent }}', '{{ info.maintenance }}', '{{ info.electricity }}', '{{ info.last_month_balance }}', '{{ info.total }}', '{{ info.pending }}', '{{ info.collected }}', '{{ info.upi_amount }}', '{{ info.cash_amount }}', '{{ info.collection_date_str }}')">
                                             👁️
                                         </button>
                                     </div>
                                     {% if info.is_multi_room and info.tenant %}
-                                    <a href="{% url 'combined_bill' info.tenant.id %}" class="btn btn-sm btn-primary py-0 px-1 mt-1 text-nowrap" style="font-size: 0.72rem;">
+                                    <a href="{% url 'combined_bill' info.tenant.id %}" class="btn btn-sm btn-primary py-0 px-2 mt-1" style="font-size: 0.72rem;">
                                         ⭐ Combined Bill 📄
                                     </a>
                                     {% endif %}
@@ -298,79 +312,7 @@
 </div>
 
 <script>
-function makeEbNil(rentRecordId) {
-    if (!confirm("Set Electricity charges to Nil (₹0) for this room?")) return;
-
-    fetch(`/api/rent-detail/${rentRecordId}/set-nil/`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": "{{ csrf_token }}"
-        }
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert("Error updating record.");
-        }
-    })
-    .catch(err => {
-        console.error(err);
-        location.reload();
-    });
-}
-
-function makeLmbNil(rentRecordId) {
-    if (!confirm("Set Last Month Balance to Nil (₹0) for this room?")) return;
-
-    fetch(`/api/rent-detail/${rentRecordId}/set-nil-lmb/`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": "{{ csrf_token }}"
-        }
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert("Error updating record.");
-        }
-    })
-    .catch(err => {
-        console.error(err);
-        location.reload();
-    });
-}
-
-function shiftPending(rentRecordId) {
-    if (!confirm("Shift this Pending Balance into Last Month Balance?")) return;
-
-    fetch(`/api/rent-detail/${rentRecordId}/shift-pending/`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": "{{ csrf_token }}"
-        }
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert("Error shifting balance.");
-        }
-    })
-    .catch(err => {
-        console.error(err);
-        location.reload();
-    });
-}
-
-function previewBill(room, billDate, tenant, rent, maint, eb, lmb, total, collected, upi, cash, collDate) {
+function previewBill(room, billDate, tenant, rent, maint, eb, lmb, total, pending, collected, upi, cash, collDate) {
     const content = `
         <div><strong>Room Number:</strong> ${room}</div>
         <div><strong>Date:</strong> ${billDate}</div>
@@ -381,6 +323,7 @@ function previewBill(room, billDate, tenant, rent, maint, eb, lmb, total, collec
         <div><strong>Last Month Balance:</strong> ₹${lmb || '0.00'}</div>
         <hr class="my-2">
         <div class="fs-5 fw-bold"><strong>Total Bill:</strong> ₹${total}</div>
+        <div class="text-danger fw-bold"><strong>Pending Balance:</strong> ₹${pending || '0.00'}</div>
         <div class="text-success"><strong>Total Received:</strong> ₹${collected}</div>
         <div class="text-primary ps-3"><strong>Received via UPI:</strong> ₹${upi || '0.00'}</div>
         <div class="text-secondary ps-3"><strong>Received via Cash:</strong> ₹${cash || '0.00'}</div>
