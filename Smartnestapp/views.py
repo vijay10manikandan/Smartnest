@@ -203,29 +203,20 @@ def edit_electricity_view(request, reading_id=None):
 def room_details_view(request):
     current_month = date.today().replace(day=1)
 
-    if request.method == "POST" and "modify_room_rent" in request.POST:
-        room_id = request.POST.get("room_id")
+    if request.method == 'POST' and 'update_room_rent' in request.POST:
+        room_id = request.POST.get('room_id')
         room = get_object_or_404(Room, id=room_id)
-
-        room.monthly_rent = Decimal(str(request.POST.get("monthly_rent", "0.00") or 0))
-        room.target_advance_amount = Decimal(str(request.POST.get("target_advance_amount", "0.00") or 0))
-        room.is_vacant = ('is_vacant' in request.POST)
-
-        m_type = request.POST.get("maintenance_type", "PER_ROOM")
-        room.maintenance_type = m_type
-
-        if m_type == "PER_MEMBER":
-            rate = Decimal(str(request.POST.get("maintenance_rate_per_member", "250.00") or "250.00"))
-            count = int(request.POST.get("member_count") or room.get_tenant_member_count() or 1)
-            room.maintenance_rate_per_member = rate
-            calculated_maint = rate * Decimal(str(count))
-            room.maintenance_charges = calculated_maint
+        rent_type = request.POST.get('rent_type', 'PER_ROOM')
+        
+        room.rent_type = rent_type
+        if rent_type == 'PER_MEMBER':
+            room.rent_rate_per_member = Decimal(str(request.POST.get('rent_rate_per_member', '0.00') or 0))
         else:
-            fixed_amount = Decimal(str(request.POST.get("maintenance_fixed_amount", "500.00") or "500.00"))
-            room.maintenance_charges = fixed_amount
-            calculated_maint = fixed_amount
-
+            room.monthly_rent = Decimal(str(request.POST.get('monthly_rent', '0.00') or 0))
+            
         room.save()
+        messages.success(request, f"Updated Rent settings for Room {room.room_number}")
+        return redirect('room_details')
 
         # Connect with Rent Details for current month
         rent_obj, _ = RentDetail.objects.get_or_create(
@@ -299,11 +290,27 @@ def extract_numeric_by_keywords(instance, keywords):
                     pass
     return Decimal('0.00')
 
+def get_room_rent_value(room):
+    """
+    Computes monthly rent based on Room Details:
+    - If PER_MEMBER: count from members_names * rent_rate_per_member
+    - If PER_ROOM: monthly_rent
+    """
+    if not room:
+        return Decimal('0.00')
 
+    r_type = str(getattr(room, 'rent_type', 'PER_ROOM') or 'PER_ROOM').strip().upper()
+    if r_type == 'PER_MEMBER':
+        rate = Decimal(str(getattr(room, 'rent_rate_per_member', '0.00') or 0))
+        tenant = getattr(room, 'current_tenant', None)
+        persons = get_tenant_member_count(tenant)
+        return rate * Decimal(str(persons))
+
+    return Decimal(str(getattr(room, 'monthly_rent', '0.00') or 0))
 def get_room_maint_value(room):
     """
     Computes maintenance based on Room Details:
-    - If PER_MEMBER: total number of persons from members_names * maintenance_rate_per_member
+    - If PER_MEMBER: count from members_names * maintenance_rate_per_member
     - If PER_ROOM: maintenance_charges
     """
     if not room:
@@ -318,9 +325,9 @@ def get_room_maint_value(room):
 
     return Decimal(str(getattr(room, 'maintenance_charges', '0.00') or 0))
 def recalculate_rent_record(rent_record, room=None, tenant=None, default_elec=Decimal('0.00'), preserve_pending=False):
-    """Helper to compute totals and pending balance while keeping Rent, Maintenance & Electricity intact."""
+    """Computes totals and pending balance using dynamic Rent and Maintenance values."""
     if room:
-        rent_record.rent_amount = getattr(room, 'monthly_rent', Decimal('0.00'))
+        rent_record.rent_amount = get_room_rent_value(room)
         rent_record.maintenance_charge = get_room_maint_value(room)
     if tenant is not None:
         rent_record.tenant = tenant
@@ -1274,7 +1281,7 @@ def combined_bill_view(request, tenant_id):
     whatsapp_lines.append(f"Received via UPI: ₹{total_upi}")
     whatsapp_lines.append(f"Received via Cash: ₹{total_cash}")
     whatsapp_lines.append(f"Collection Date: {coll_date_str}")
-    whatsapp_lines.append(f"Grand Total: ₹{grand_total}")
+    
 
     whatsapp_text_encoded = urllib.parse.quote("\n".join(whatsapp_lines))
 

@@ -28,7 +28,12 @@ class Room(models.Model):
     monthly_rent = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
     target_advance_amount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
     is_vacant = models.BooleanField(default=False)
-
+    rent_type = models.CharField(
+        max_length=20,
+        choices=[('PER_ROOM', 'Per Room'), ('PER_MEMBER', 'Per Member')],
+        default='PER_ROOM'
+    )
+    rent_rate_per_member = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
     # Maintenance settings
     maintenance_type = models.CharField(max_length=20, choices=MAINTENANCE_TYPES, default='PER_ROOM')
     maintenance_charges = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('500.00'))
