@@ -78,25 +78,24 @@ WSGI_APPLICATION = 'Smartnest.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-database_url = os.environ.get('DATABASE_URL')
+DATABASE_URL = os.environ.get('DATABASE_URL')
 
-DATABASES = {
-    'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL'),
-        conn_max_age=0,           # Prevents "InterfaceError: connection already closed" on NeonDB
-        conn_health_checks=True,  # Verifies connection health before executing queries
-        ssl_require=True
-    )
-}
+if DATABASE_URL:
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=0,
+            conn_health_checks=True,
+            ssl_require=True
+        )
+    }
 else:
-    # Standard SQLite configuration for local Windows development
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
