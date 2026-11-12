@@ -41,16 +41,18 @@
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
+                <table class="table table-hover align-middle mb-0 text-nowrap">
                     <thead class="table-light">
                         <tr>
                             <th>Room</th>
                             <th>Building</th>
                             <th>Rent</th>
-                            <th>Electricity</th>
                             <th>Maintenance</th>
+                            <th>Electricity</th>
+                            <th>Last Month Bal.</th>
                             <th>Subtotal</th>
-                            <th>Collected</th>
+                            <th>Received</th>
+                            <th>Pending</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -59,14 +61,16 @@
                             <td><strong>{{ r.room.room_number }}</strong></td>
                             <td>{{ r.room.building.name }}</td>
                             <td>₹{{ r.rent_amount|default:"0.00" }}</td>
-                            <td>₹{{ r.electricity_charge|default:"0.00" }}</td>
                             <td>₹{{ r.maintenance_charge|default:"0.00" }}</td>
+                            <td>₹{{ r.electricity_charge|default:"0.00" }}</td>
+                            <td>₹{{ r.last_month_balance|default:"0.00" }}</td>
                             <td class="fw-bold text-primary">₹{{ r.total_amount|default:"0.00" }}</td>
                             <td class="text-success fw-bold">₹{{ r.paid_amount|default:"0.00" }}</td>
+                            <td class="text-danger fw-bold">₹{{ r.current_balance_due|default:"0.00" }}</td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="7" class="text-center text-muted py-3">No room records found for this tenant.</td>
+                            <td colspan="9" class="text-center text-muted py-3">No room records found for this tenant.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -74,10 +78,12 @@
                         <tr>
                             <td colspan="2">Consolidated Totals ({{ rent_records.count }} Rooms)</td>
                             <td>₹{{ total_rent }}</td>
-                            <td>₹{{ total_electricity }}</td>
                             <td>₹{{ total_maintenance }}</td>
+                            <td>₹{{ total_electricity }}</td>
+                            <td>₹{{ total_lmb }}</td>
                             <td class="text-primary">₹{{ grand_total }}</td>
                             <td class="text-success">₹{{ total_paid }}</td>
+                            <td class="text-danger">₹{{ total_pending }}</td>
                         </tr>
                     </tfoot>
                 </table>
@@ -85,7 +91,7 @@
         </div>
     </div>
 
-    <!-- Overall Payment Summary Card without pending balance line -->
+    <!-- Overall Payment Summary Card -->
     <div class="row justify-content-end">
         <div class="col-md-5">
             <div class="card border-0 shadow-sm">
@@ -100,29 +106,41 @@
                         <span>₹{{ total_rent }}</span>
                     </div>
                     <div class="d-flex justify-content-between mb-1">
+                        <span>Total Maintenance:</span>
+                        <span>₹{{ total_maintenance }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
                         <span>Total Electricity:</span>
                         <span>₹{{ total_electricity }}</span>
                     </div>
                     <div class="d-flex justify-content-between mb-1">
-                        <span>Total Maintenance:</span>
-                        <span>₹{{ total_maintenance }}</span>
+                        <span>Last Month Balance:</span>
+                        <span>₹{{ total_lmb }}</span>
                     </div>
                     <hr class="my-2">
                     <div class="d-flex justify-content-between mb-1 fs-5 fw-bold text-primary">
                         <span>Grand Total:</span>
                         <span>₹{{ grand_total }}</span>
                     </div>
+                    <div class="d-flex justify-content-between mb-1 text-danger fw-bold">
+                        <span>Pending Balance:</span>
+                        <span>₹{{ total_pending }}</span>
+                    </div>
                     <div class="d-flex justify-content-between mb-1 text-success fw-bold">
-                        <span>Total Collected:</span>
+                        <span>Total Received:</span>
                         <span>₹{{ total_paid }}</span>
                     </div>
                     <div class="d-flex justify-content-between mb-1 text-primary small ps-3">
-                        <span>Paid via UPI:</span>
+                        <span>Received via UPI:</span>
                         <span>₹{{ total_upi }}</span>
                     </div>
                     <div class="d-flex justify-content-between mb-1 text-secondary small ps-3">
-                        <span>Paid via Cash:</span>
+                        <span>Received via Cash:</span>
                         <span>₹{{ total_cash }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1 text-muted small ps-3">
+                        <span>Collection Date:</span>
+                        <span>{{ collection_date_str }}</span>
                     </div>
                 </div>
             </div>

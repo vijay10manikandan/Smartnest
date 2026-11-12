@@ -1179,7 +1179,8 @@ def expense_details_view(request):
     return render(request, 'Smartnestapp/expenses.html', {'expense': expense})
 @login_required
 def combined_bill_view(request, tenant_id):
-    current_month = date.today().replace(day=1)
+    today = date.today()
+    current_month = today.replace(day=1)
     tenant = get_object_or_404(Tenant, id=tenant_id)
     
     t_phone = getattr(tenant, 'phone_number', '') or getattr(tenant, 'phone', '')
@@ -1212,6 +1213,7 @@ def combined_bill_view(request, tenant_id):
     total_upi = Decimal('0.00')
     total_cash = Decimal('0.00')
     total_pending = Decimal('0.00')
+    latest_coll_date = None
 
     bill_date_str = current_month.strftime("%d/%m/%Y")
     whatsapp_lines = [
@@ -1220,7 +1222,17 @@ def combined_bill_view(request, tenant_id):
     ]
 
     for r in rent_records:
-        recalculate_rent_record(r, room=r.room)
+        # Preserve pushed balance state if Push was clicked in Rent Details
+        is_pushed = (
+            (r.last_month_balance or Decimal('0.00')) > Decimal('0.00') and
+            (r.current_balance_due or Decimal('0.00')) == Decimal('0.00') and
+            (r.rent_amount or Decimal('0.00')) == Decimal('0.00')
+        )
+        if not is_pushed:
+            recalculate_rent_record(r, room=r.room)
+
+        if r.collection_date and (not latest_coll_date or r.collection_date > latest_coll_date):
+            latest_coll_date = r.collection_date
 
         r_rent = r.rent_amount or Decimal('0.00')
         r_maint = r.maintenance_charge or Decimal('0.00')
@@ -1246,11 +1258,14 @@ def combined_bill_view(request, tenant_id):
         whatsapp_lines.append(f"Last Month Balance: ₹{r_lmb}")
         whatsapp_lines.append(f"Subtotal: ₹{r_tot}")
 
+    coll_date_str = latest_coll_date.strftime("%d/%m/%Y") if latest_coll_date else "-"
+
     whatsapp_lines.append(f"Total Bill: ₹{grand_total}")
     whatsapp_lines.append(f"Pending Balance: ₹{total_pending}")
     whatsapp_lines.append(f"Total Received: ₹{total_paid}")
     whatsapp_lines.append(f"Received via UPI: ₹{total_upi}")
     whatsapp_lines.append(f"Received via Cash: ₹{total_cash}")
+    whatsapp_lines.append(f"Collection Date: {coll_date_str}")
     whatsapp_lines.append(f"Grand Total: ₹{grand_total}")
 
     whatsapp_text_encoded = urllib.parse.quote("\n".join(whatsapp_lines))
@@ -1260,6 +1275,7 @@ def combined_bill_view(request, tenant_id):
         'rent_records': rent_records,
         'billing_month': current_month,
         'bill_date': bill_date_str,
+        'collection_date_str': coll_date_str,
         'total_rent': total_rent,
         'total_maintenance': total_maintenance,
         'total_electricity': total_electricity,
