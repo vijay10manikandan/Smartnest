@@ -1,84 +1,111 @@
 {% extends 'Smartnestapp/base.html' %}
 {% block content %}
-<div class="container py-3">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3 class="fw-bold mb-0">Monthly Expenses Details</h3>
-        <span class="badge bg-danger fs-6">Total: ₹{{ expense.total_expense }}</span>
+<div class="container-fluid py-3 px-2 px-md-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="fw-bold mb-0 fs-4 fs-md-3">Monthly Expense Tracker</h2>
+        <span class="badge bg-dark fs-6">Total Active: ₹{{ total_expense|default:"0.00" }}</span>
     </div>
 
-    <form method="POST" class="card shadow-sm p-4 bg-white rounded">
+    {% if messages %}
+        {% for msg in messages %}
+            <div class="alert alert-success alert-dismissible fade show py-2" role="alert">
+                {{ msg }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="POST">
         {% csrf_token %}
-        <div class="table-responsive">
-            <table class="table table-hover align-middle">
-                <thead class="table-dark">
-                    <tr>
-                        <th style="width: 80px;">Active</th>
-                        <th>Expense Description</th>
-                        <th style="width: 250px;">Amount (₹)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><input type="checkbox" name="grt_active" class="form-check-input" {% if expense.grt_payment_active %}checked{% endif %}></td>
-                        <td>GRT Payment</td>
-                        <td><input type="number" step="0.01" name="grt_amount" class="form-control form-control-sm" value="{{ expense.grt_payment }}"></td>
-                    </tr>
-                    <tr>
-                        <td><input type="checkbox" name="tneb_active" class="form-check-input" {% if expense.tneb_active %}checked{% endif %}></td>
-                        <td>TNEB Payment</td>
-                        <td><input type="number" step="0.01" name="tneb_amount" class="form-control form-control-sm" value="{{ expense.tneb_payment }}"></td>
-                    </tr>
-                    <tr>
-                        <td><input type="checkbox" name="mani1_active" class="form-check-input" {% if expense.mani_chit_1_active %}checked{% endif %}></td>
-                        <td>Mani Chit (1)</td>
-                        <td><input type="number" step="0.01" name="mani1_amount" class="form-control form-control-sm" value="{{ expense.mani_chit_1 }}"></td>
-                    </tr>
-                    <tr>
-                        <td><input type="checkbox" name="kiruba_active" class="form-check-input" {% if expense.kiruba_active %}checked{% endif %}></td>
-                        <td>kiruba</td>
-                        <td><input type="number" step="0.01" name="kiruba_amount" class="form-control form-control-sm" value="{{ expense.kiruba }}"></td>
-                    </tr>
-                    <tr>
-                        <td><input type="checkbox" name="indira_active" class="form-check-input" {% if expense.indira_chit_active %}checked{% endif %}></td>
-                        <td>Indira Chit</td>
-                        <td><input type="number" step="0.01" name="indira_amount" class="form-control form-control-sm" value="{{ expense.indira_chit }}"></td>
-                    </tr>
-                    <tr>
-                        <td><input type="checkbox" name="milk_active" class="form-check-input" {% if expense.dhamayanthi_milk_chit_active %}checked{% endif %}></td>
-                        <td>Dhamayanthi Milk and Chit</td>
-                        <td><input type="number" step="0.01" name="milk_amount" class="form-control form-control-sm" value="{{ expense.dhamayanthi_milk_chit }}"></td>
-                    </tr>
-                    <tr>
-                        <td><input type="checkbox" name="gas_active" class="form-check-input" {% if expense.gas_cylinder_active %}checked{% endif %}></td>
-                        <td>Gas Cylinder</td>
-                        <td><input type="number" step="0.01" name="gas_amount" class="form-control form-control-sm" value="{{ expense.gas_cylinder }}"></td>
-                    </tr>
-                    <tr>
-                        <td><input type="checkbox" name="groceries_active" class="form-check-input" {% if expense.groceries_active %}checked{% endif %}></td>
-                        <td>Groceries</td>
-                        <td><input type="number" step="0.01" name="groceries_amount" class="form-control form-control-sm" value="{{ expense.groceries }}"></td>
-                    </tr>
-                    <tr>
-                        <td><input type="checkbox" name="hardwares_active" class="form-check-input" {% if expense.hardwares_active %}checked{% endif %}></td>
-                        <td>Hardwares</td>
-                        <td><input type="number" step="0.01" name="hardwares_amount" class="form-control form-control-sm" value="{{ expense.hardwares }}"></td>
-                    </tr>
-                    <tr>
-                        <td><input type="checkbox" name="broadband_active" class="form-check-input" {% if expense.broadband_3_active %}checked{% endif %}></td>
-                        <td>Broadband Recharge (3)</td>
-                        <td><input type="number" step="0.01" name="broadband_amount" class="form-control form-control-sm" value="{{ expense.broadband_recharge_3 }}"></td>
-                    </tr>
-                    <tr>
-                        <td><input type="checkbox" name="other_active" class="form-check-input" {% if expense.other_expenses_active %}checked{% endif %}></td>
-                        <td>Other Expenses</td>
-                        <td><input type="number" step="0.01" name="other_amount" class="form-control form-control-sm" value="{{ expense.other_expenses }}"></td>
-                    </tr>
-                </tbody>
-            </table>
+        <div class="card shadow-sm border-0 mb-3">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th class="ps-3" style="width: 80px;">Active</th>
+                                <th>Expense Description</th>
+                                <th style="width: 240px;" class="pe-3">Amount (₹)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for exp in expenses %}
+                            <tr>
+                                <td class="ps-3">
+                                    <input class="form-check-input expense-checkbox"
+                                           type="checkbox"
+                                           name="active_{{ exp.id }}"
+                                           id="chk_{{ exp.id }}"
+                                           data-target="amt_{{ exp.id }}"
+                                           style="width: 1.2rem; height: 1.2rem; cursor: pointer;"
+                                           {% if exp.is_active %}checked{% endif %}>
+                                </td>
+
+                                <td class="fw-semibold text-dark">
+                                    <label for="chk_{{ exp.id }}" style="cursor: pointer;" class="mb-0 w-100">
+                                        {{ exp.description|default:exp.name }}
+                                    </label>
+                                </td>
+
+                                <td class="pe-3">
+                                    <input type="number"
+                                           step="0.01"
+                                           name="amount_{{ exp.id }}"
+                                           id="amt_{{ exp.id }}"
+                                           class="form-control form-control-sm expense-amount"
+                                           data-checkbox="chk_{{ exp.id }}"
+                                           value="{% if exp.is_active and exp.amount %}{{ exp.amount }}{% endif %}"
+                                           placeholder="0.00"
+                                           {% if not exp.is_active %}readonly style="background-color: #f8f9fa;"{% endif %}>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center text-muted py-3">No expense items configured.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-        <div class="text-end mt-3">
-            <button type="submit" class="btn btn-primary px-4">💾 Save Expenses</button>
+
+        <div class="d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                💾 Save Expenses
+            </button>
         </div>
     </form>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.expense-checkbox').forEach(function (chk) {
+        chk.addEventListener('change', function () {
+            const amtInput = document.getElementById(this.dataset.target);
+            if (this.checked) {
+                amtInput.removeAttribute('readonly');
+                amtInput.style.backgroundColor = '#ffffff';
+                amtInput.focus();
+            } else {
+                amtInput.setAttribute('readonly', true);
+                amtInput.style.backgroundColor = '#f8f9fa';
+                amtInput.value = '';
+            }
+        });
+    });
+
+    document.querySelectorAll('.expense-amount').forEach(function (input) {
+        input.addEventListener('click', function () {
+            const chk = document.getElementById(this.dataset.checkbox);
+            if (chk && !chk.checked) {
+                chk.checked = true;
+                this.removeAttribute('readonly');
+                this.style.backgroundColor = '#ffffff';
+                this.focus();
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

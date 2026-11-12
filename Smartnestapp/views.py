@@ -1156,48 +1156,39 @@ def pwa_sw(request):
     )
     return HttpResponse(js_content, content_type="application/javascript")
 
+@login_required
 def expense_details_view(request):
-    expense, _ = MonthlyExpense.objects.get_or_create(month="Nov 2026")
-    
-    if request.method == "POST":
-        expense.grt_payment_active = 'grt_active' in request.POST
-        expense.grt_payment = request.POST.get('grt_amount', 25000)
-        
-        expense.tneb_active = 'tneb_active' in request.POST
-        expense.tneb_payment = request.POST.get('tneb_amount', 0)
-        
-        expense.mani_chit_1_active = 'mani1_active' in request.POST
-        expense.mani_chit_1 = request.POST.get('mani1_amount', 0)
-        
-        expense.mani_chit_2_active = 'mani2_active' in request.POST
-        expense.mani_chit_2 = request.POST.get('mani2_amount', 0)
-        
-        expense.indira_chit_active = 'indira_active' in request.POST
-        expense.indira_chit = request.POST.get('indira_amount', 0)
-        
-        expense.dhamayanthi_milk_chit_active = 'milk_active' in request.POST
-        expense.dhamayanthi_milk_chit = request.POST.get('milk_amount', 0)
-        
-        expense.gas_cylinder_active = 'gas_active' in request.POST
-        expense.gas_cylinder = request.POST.get('gas_amount', 0)
-        
-        expense.groceries_active = 'groceries_active' in request.POST
-        expense.groceries = request.POST.get('groceries_amount', 0)
-        
-        expense.hardwares_active = 'hardwares_active' in request.POST
-        expense.hardwares = request.POST.get('hardwares_amount', 0)
-        
-        expense.broadband_3_active = 'broadband_active' in request.POST
-        expense.broadband_recharge_3 = request.POST.get('broadband_amount', 0)
-        
-        expense.other_expenses_active = 'other_active' in request.POST
-        expense.other_expenses = request.POST.get('other_amount', 0)
-        
-        expense.save()
-        messages.success(request, "Expenses updated successfully!")
-        return redirect('expense_details')
+    close_old_connections()
+    today = date.today()
+    current_month = today.replace(day=1)
 
-    return render(request, 'Smartnestapp/expenses.html', {'expense': expense})
+    if request.method == 'POST':
+        all_expenses = Expense.objects.all()
+        for exp in all_expenses:
+            is_checked = f"active_{exp.id}" in request.POST
+            raw_amt = request.POST.get(f"amount_{exp.id}", "").strip()
+
+            exp.is_active = is_checked
+            if is_checked and raw_amt:
+                try:
+                    exp.amount = Decimal(raw_amt)
+                except Exception:
+                    exp.amount = Decimal('0.00')
+            elif not is_checked:
+                exp.amount = Decimal('0.00')
+            exp.save()
+
+        messages.success(request, "Expenses updated successfully.")
+        return redirect(request.path)
+
+    expenses = Expense.objects.all().order_by('id')
+    total_expense = sum((e.amount or Decimal('0.00')) for e in expenses if getattr(e, 'is_active', True))
+
+    return render(request, 'Smartnestapp/expenses.html', {
+        'expenses': expenses,
+        'total_expense': total_expense,
+        'billing_month': current_month,
+    })
 @login_required
 def combined_bill_view(request, tenant_id):
     today = date.today()
