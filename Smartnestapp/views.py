@@ -201,6 +201,7 @@ def edit_electricity_view(request, reading_id=None):
 # ==============================================================================
 @login_required
 def room_view(request):
+    room_details_view = room_view
     # Ensure any stale/dropped NeonDB SSL connection is cleared before querying
     close_old_connections()
 
@@ -1305,3 +1306,58 @@ def combined_bill_view(request, tenant_id):
         'whatsapp_text_encoded': whatsapp_text_encoded,
     }
     return render(request, 'Smartnestapp/combined_bill.html', context)
+@login_required
+def room_details_view(request):
+    close_old_connections()
+
+    if request.method == 'POST':
+        room_id = request.POST.get('room_id')
+        room = get_object_or_404(Room, id=room_id)
+
+        # 1. Handle Inline Rent Edit Modal (1. Per Room vs 2. Per Member)
+        if 'update_room_rent' in request.POST:
+            rent_type = request.POST.get('rent_type', 'PER_ROOM')
+            room.rent_type = rent_type
+            if rent_type == 'PER_MEMBER':
+                room.rent_rate_per_member = Decimal(str(request.POST.get('rent_rate_per_member', '0.00') or 0))
+            else:
+                room.monthly_rent = Decimal(str(request.POST.get('monthly_rent', '0.00') or 0))
+            room.save(update_fields=['rent_type', 'monthly_rent', 'rent_rate_per_member'])
+            messages.success(request, f"Room {room.room_number}: Rent updated.")
+            return redirect(request.path)
+
+        # 2. Handle Modify Room Modal (Target Advance & Maintenance)
+        if 'modify_room' in request.POST:
+            room.target_advance_amount = Decimal(str(request.POST.get('target_advance_amount', '0.00') or 0))
+            maint_type = request.POST.get('maintenance_type', 'PER_ROOM')
+            room.maintenance_type = maint_type
+            if maint_type == 'PER_MEMBER':
+                room.maintenance_rate_per_member = Decimal(str(request.POST.get('maintenance_rate_per_member', '0.00') or 0))
+            else:
+                room.maintenance_charges = Decimal(str(request.POST.get('maintenance_charges', '0.00') or 0))
+            room.save(update_fields=[
+                'target_advance_amount',
+                'maintenance_type',
+                'maintenance_charges',
+                'maintenance_rate_per_member'
+            ])
+            messages.success(request, f"Room {room.room_number}: Details updated.")
+            return redirect(request.path)
+
+    all_rooms = list(Room.objects.select_related('building').all().order_by('room_number'))
+    buildings = list(Building.objects.all())
+
+    building_data = [
+        {
+            'building': b,
+            'rooms': [r for r in all_rooms if r.building_id == b.id]
+        }
+        for b in buildings
+    ]
+
+    return render(request, 'Smartnestapp/room.html', {
+        'building_data': building_data,
+        'buildings': buildings,
+        'rooms': all_rooms,
+        'all_rooms': all_rooms,
+    })
