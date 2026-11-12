@@ -200,59 +200,61 @@ def edit_electricity_view(request, reading_id=None):
 # 2. Room Details View (Floor-wise & Default Configurations)
 # ==============================================================================
 @login_required
-def room_details_view(request):
-    current_month = date.today().replace(day=1)
+def room_view(request):
+    # Ensure any stale/dropped NeonDB SSL connection is cleared before querying
+    close_old_connections()
 
-    if request.method == 'POST' and 'update_room_rent' in request.POST:
+    if request.method == 'POST':
         room_id = request.POST.get('room_id')
         room = get_object_or_404(Room, id=room_id)
-        rent_type = request.POST.get('rent_type', 'PER_ROOM')
-        
-        room.rent_type = rent_type
-        if rent_type == 'PER_MEMBER':
-            room.rent_rate_per_member = Decimal(str(request.POST.get('rent_rate_per_member', '0.00') or 0))
-        else:
-            room.monthly_rent = Decimal(str(request.POST.get('monthly_rent', '0.00') or 0))
-            
-        room.save()
-        messages.success(request, f"Updated Rent settings for Room {room.room_number}")
-        return redirect('room_details')
 
-        # Connect with Rent Details for current month
-        rent_obj, _ = RentDetail.objects.get_or_create(
-            room=room,
-            month=current_month,
-            defaults={
-                'tenant': room.current_tenant,
-                'rent_amount': room.monthly_rent,
-                'maintenance_charge': calculated_maint,
-                'electricity_charge': Decimal('0.00'),
-                'last_month_balance': Decimal('0.00'),
-            }
-        )
-        rent_obj.rent_amount = room.monthly_rent
-        rent_obj.maintenance_charge = calculated_maint
-        rent_obj.save()
+        # 1. Handle Inline Rent Edit Modal (1. Per Room vs 2. Per Member)
+        if 'update_room_rent' in request.POST:
+            rent_type = request.POST.get('rent_type', 'PER_ROOM')
+            room.rent_type = rent_type
+            if rent_type == 'PER_MEMBER':
+                room.rent_rate_per_member = Decimal(str(request.POST.get('rent_rate_per_member', '0.00') or 0))
+            else:
+                room.monthly_rent = Decimal(str(request.POST.get('monthly_rent', '0.00') or 0))
+            room.save(update_fields=['rent_type', 'monthly_rent', 'rent_rate_per_member'])
+            messages.success(request, f"Room {room.room_number}: Rent updated ({room.get_rent_type_display()}).")
+            return redirect(request.path)
 
-        messages.success(request, f"Room {room.room_number}: Maintenance ₹{calculated_maint:.2f} updated and synced to Rent Details.")
-        return redirect("room_details")
+        # 2. Handle Modify Room Modal (Target Advance & Maintenance)
+        if 'modify_room' in request.POST:
+            room.target_advance_amount = Decimal(str(request.POST.get('target_advance_amount', '0.00') or 0))
+            maint_type = request.POST.get('maintenance_type', 'PER_ROOM')
+            room.maintenance_type = maint_type
+            if maint_type == 'PER_MEMBER':
+                room.maintenance_rate_per_member = Decimal(str(request.POST.get('maintenance_rate_per_member', '0.00') or 0))
+            else:
+                room.maintenance_charges = Decimal(str(request.POST.get('maintenance_charges', '0.00') or 0))
+            room.save(update_fields=[
+                'target_advance_amount',
+                'maintenance_type',
+                'maintenance_charges',
+                'maintenance_rate_per_member'
+            ])
+            messages.success(request, f"Room {room.room_number}: Details updated.")
+            return redirect(request.path)
 
-    # Load structured floor-wise rooms
-    buildings = Building.objects.all()
-    structured_data = []
-    for bldg in buildings:
-        floors = {}
-        for r in Room.objects.filter(building=bldg).order_by('room_number'):
-            floors.setdefault(r.floor, []).append(r)
+    # Single optimized query for all buildings & rooms
+    all_rooms = list(Room.objects.select_related('building').all().order_by('room_number'))
+    buildings = list(Building.objects.all())
 
-        structured_data.append({
-            'building': bldg,
-            'floors': floors
-        })
+    building_data = [
+        {
+            'building': b,
+            'rooms': [r for r in all_rooms if r.building_id == b.id]
+        }
+        for b in buildings
+    ]
 
-    return render(request, 'Smartnestapp/room_details.html', {
-        'structured_data': structured_data,
-        'total_rooms_count': Room.objects.count()
+    return render(request, 'Smartnestapp/room.html', {
+        'building_data': building_data,
+        'buildings': buildings,
+        'rooms': all_rooms,
+        'all_rooms': all_rooms,
     })
 
 

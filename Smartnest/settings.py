@@ -80,14 +80,14 @@ WSGI_APPLICATION = 'Smartnest.wsgi.application'
 
 database_url = os.environ.get('DATABASE_URL')
 
-if database_url:
-    DATABASES = {
-        'default': dj_database_url.parse(
-            database_url,
-            conn_max_age=600,
-            ssl_require=True
-        )
-    }
+DATABASES = {
+    'default': dj_database_url.config(
+        default=os.environ.get('DATABASE_URL'),
+        conn_max_age=0,           # Prevents "InterfaceError: connection already closed" on NeonDB
+        conn_health_checks=True,  # Verifies connection health before executing queries
+        ssl_require=True
+    )
+}
 else:
     # Standard SQLite configuration for local Windows development
     DATABASES = {
