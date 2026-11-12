@@ -38,12 +38,12 @@
                                            id="chk_{{ exp.id }}"
                                            data-target="amt_{{ exp.id }}"
                                            style="width: 1.2rem; height: 1.2rem; cursor: pointer;"
-                                           {% if exp.is_active %}checked{% endif %}>
+                                           {% if exp.checked_state %}checked{% endif %}>
                                 </td>
 
                                 <td class="fw-semibold text-dark">
                                     <label for="chk_{{ exp.id }}" style="cursor: pointer;" class="mb-0 w-100">
-                                        {{ exp.description|default:exp.name }}
+                                        {{ exp.label_text }}
                                     </label>
                                 </td>
 
@@ -54,9 +54,9 @@
                                            id="amt_{{ exp.id }}"
                                            class="form-control form-control-sm expense-amount"
                                            data-checkbox="chk_{{ exp.id }}"
-                                           value="{% if exp.is_active and exp.amount %}{{ exp.amount }}{% endif %}"
+                                           value="{% if exp.checked_state and exp.amount %}{{ exp.amount }}{% endif %}"
                                            placeholder="0.00"
-                                           {% if not exp.is_active %}readonly style="background-color: #f8f9fa;"{% endif %}>
+                                           {% if not exp.checked_state %}readonly style="background-color: #f8f9fa;"{% endif %}>
                                 </td>
                             </tr>
                             {% empty %}

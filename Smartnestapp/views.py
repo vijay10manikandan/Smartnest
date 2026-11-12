@@ -16,6 +16,7 @@ from .models import (
     AdvanceDetail,
     ElectricityReading,
     RentDetail,
+    MonthlyExpense,
 )
 from .forms import (
     TenantForm,
@@ -1163,12 +1164,16 @@ def expense_details_view(request):
     current_month = today.replace(day=1)
 
     if request.method == 'POST':
-        all_expenses = Expense.objects.all()
+        all_expenses = MonthlyExpense.objects.all()
         for exp in all_expenses:
             is_checked = f"active_{exp.id}" in request.POST
             raw_amt = request.POST.get(f"amount_{exp.id}", "").strip()
 
-            exp.is_active = is_checked
+            if hasattr(exp, 'is_active'):
+                exp.is_active = is_checked
+            elif hasattr(exp, 'active'):
+                exp.active = is_checked
+
             if is_checked and raw_amt:
                 try:
                     exp.amount = Decimal(raw_amt)
@@ -1181,8 +1186,17 @@ def expense_details_view(request):
         messages.success(request, "Expenses updated successfully.")
         return redirect(request.path)
 
-    expenses = Expense.objects.all().order_by('id')
-    total_expense = sum((e.amount or Decimal('0.00')) for e in expenses if getattr(e, 'is_active', True))
+    expenses = MonthlyExpense.objects.all().order_by('id')
+    for exp in expenses:
+        exp.checked_state = getattr(exp, 'is_active', getattr(exp, 'active', False))
+        exp.label_text = (
+            getattr(exp, 'description', None)
+            or getattr(exp, 'expense_description', None)
+            or getattr(exp, 'name', None)
+            or str(exp)
+        )
+
+    total_expense = sum((e.amount or Decimal('0.00')) for e in expenses if e.checked_state)
 
     return render(request, 'Smartnestapp/expenses.html', {
         'expenses': expenses,
