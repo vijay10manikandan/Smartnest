@@ -317,8 +317,8 @@ def get_room_maint_value(room):
         return rate * Decimal(str(persons))
 
     return Decimal(str(getattr(room, 'maintenance_charges', '0.00') or 0))
-def recalculate_rent_record(rent_record, room=None, tenant=None, default_elec=Decimal('0.00')):
-    """Helper to cleanly compute totals and pending balance without overwriting manual overrides."""
+def recalculate_rent_record(rent_record, room=None, tenant=None, default_elec=Decimal('0.00'), preserve_pending=False):
+    """Helper to compute totals and pending balance while keeping Rent, Maintenance & Electricity intact."""
     if room:
         rent_record.rent_amount = getattr(room, 'monthly_rent', Decimal('0.00'))
         rent_record.maintenance_charge = get_room_maint_value(room)
@@ -339,7 +339,8 @@ def recalculate_rent_record(rent_record, room=None, tenant=None, default_elec=De
         (rent_record.cash_amount or Decimal('0.00')) +
         (rent_record.upi_amount or Decimal('0.00'))
     )
-    rent_record.current_balance_due = max(Decimal('0.00'), rent_record.total_amount - rent_record.paid_amount)
+    if not preserve_pending:
+        rent_record.current_balance_due = max(Decimal('0.00'), rent_record.total_amount - rent_record.paid_amount)
     rent_record.save()
 
 def get_room_target_advance(room):
@@ -410,25 +411,23 @@ def rent_details_view(request):
         # 6. Update Pending Balance Manually
         if 'update_pending_balance' in request.POST:
             new_pending = Decimal(str(request.POST.get('current_balance_due', '0.00') or 0))
-            # Adjust total_amount so pending reflects the manual override accurately
             rent_record.current_balance_due = new_pending
-            rent_record.total_amount = (rent_record.paid_amount or Decimal('0.00')) + new_pending
             rent_record.save()
             messages.success(request, f"Updated Room {rent_record.room.room_number} Pending Balance to ₹{new_pending}")
             return redirect('rent_details')
 
-        # 7. Push Pending Balance into Last Month Balance
+        # 7. Push Pending Balance into Last Month Balance (keeping Rent, Maint & EB unchanged)
         if 'push_pending_to_lmb' in request.POST:
             pending_amt = rent_record.current_balance_due or Decimal('0.00')
             if pending_amt > Decimal('0.00'):
-                # Shift pending amount into Last Month Balance and reset current charges/pending
                 rent_record.last_month_balance = (rent_record.last_month_balance or Decimal('0.00')) + pending_amt
-                # Mark current due as shifted by settling current bill to paid + LMB carry-forward
-                rent_record.rent_amount = Decimal('0.00')
-                rent_record.maintenance_charge = Decimal('0.00')
-                rent_record.electricity_charge = Decimal('0.00')
-                rent_record.total_amount = rent_record.last_month_balance
                 rent_record.current_balance_due = Decimal('0.00')
+                rent_record.total_amount = (
+                    (rent_record.rent_amount or Decimal('0.00')) +
+                    (rent_record.maintenance_charge or Decimal('0.00')) +
+                    (rent_record.electricity_charge or Decimal('0.00')) +
+                    rent_record.last_month_balance
+                )
                 rent_record.save()
                 messages.success(request, f"Room {rent_record.room.room_number}: Pushed ₹{pending_amt} to Last Month Balance.")
             return redirect('rent_details')
@@ -456,9 +455,20 @@ def rent_details_view(request):
             }
         )
 
-        # Only sync room rates if the record has not had its pending balance pushed
-        if created or not (rent_record.last_month_balance > Decimal('0.00') and rent_record.current_balance_due == Decimal('0.00') and rent_record.rent_amount == Decimal('0.00')):
-            recalculate_rent_record(rent_record, room=r, tenant=tenant, default_elec=elec_cost)
+        # Preserve manually edited or pushed pending balance if already shifted
+        is_shifted_or_manual = (
+            not created and
+            (rent_record.last_month_balance or Decimal('0.00')) > Decimal('0.00') and
+            (rent_record.current_balance_due or Decimal('0.00')) == Decimal('0.00') and
+            (rent_record.paid_amount or Decimal('0.00')) < (rent_record.total_amount or Decimal('0.00'))
+        )
+        recalculate_rent_record(
+            rent_record,
+            room=r,
+            tenant=tenant,
+            default_elec=elec_cost,
+            preserve_pending=is_shifted_or_manual
+        )
 
         t_name = getattr(tenant, 'primary_name', None) or getattr(tenant, 'name', '')
         t_phone = getattr(tenant, 'phone_number', None) or getattr(tenant, 'phone', '')
@@ -1222,14 +1232,12 @@ def combined_bill_view(request, tenant_id):
     ]
 
     for r in rent_records:
-        # Preserve pushed balance state if Push was clicked in Rent Details
-        is_pushed = (
+        is_shifted = (
             (r.last_month_balance or Decimal('0.00')) > Decimal('0.00') and
             (r.current_balance_due or Decimal('0.00')) == Decimal('0.00') and
-            (r.rent_amount or Decimal('0.00')) == Decimal('0.00')
+            (r.paid_amount or Decimal('0.00')) < (r.total_amount or Decimal('0.00'))
         )
-        if not is_pushed:
-            recalculate_rent_record(r, room=r.room)
+        recalculate_rent_record(r, room=r.room, preserve_pending=is_shifted)
 
         if r.collection_date and (not latest_coll_date or r.collection_date > latest_coll_date):
             latest_coll_date = r.collection_date
@@ -1261,8 +1269,8 @@ def combined_bill_view(request, tenant_id):
     coll_date_str = latest_coll_date.strftime("%d/%m/%Y") if latest_coll_date else "-"
 
     whatsapp_lines.append(f"Total Bill: ₹{grand_total}")
-    whatsapp_lines.append(f"Pending Balance: ₹{total_pending}")
     whatsapp_lines.append(f"Total Received: ₹{total_paid}")
+    whatsapp_lines.append(f"Pending Balance: ₹{total_pending}")
     whatsapp_lines.append(f"Received via UPI: ₹{total_upi}")
     whatsapp_lines.append(f"Received via Cash: ₹{total_cash}")
     whatsapp_lines.append(f"Collection Date: {coll_date_str}")

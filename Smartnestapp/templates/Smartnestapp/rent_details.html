@@ -1,13 +1,13 @@
 {% extends 'Smartnestapp/base.html' %}
 {% block content %}
-<div class="container-fluid py-3">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold mb-0">Building-Wise Rent & Utility Breakdown</h2>
+<div class="container-fluid py-3 px-2 px-md-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="fw-bold mb-0 fs-4 fs-md-3">Building-Wise Rent & Utility Breakdown</h2>
     </div>
 
     {% if messages %}
         {% for msg in messages %}
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <div class="alert alert-success alert-dismissible fade show py-2" role="alert">
                 {{ msg }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
@@ -16,38 +16,40 @@
 
     {% for b_entry in building_data %}
     <div class="card mb-4 shadow-sm border-0">
-        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-2">
-            <h5 class="mb-0 fw-semibold">{{ b_entry.building.name }}</h5>
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-2 px-3">
+            <h5 class="mb-0 fw-semibold fs-6">{{ b_entry.building.name }}</h5>
             <span class="badge bg-secondary">{{ b_entry.rooms_info|length }} Rooms</span>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover mb-0 align-middle text-nowrap">
+                <table class="table table-hover table-sm mb-0 align-middle" style="font-size: 0.86rem;">
                     <thead class="table-light">
                         <tr>
-                            <th style="width: 70px;">Room</th>
-                            <th style="min-width: 150px;">Tenant</th>
-                            <th style="min-width: 95px;">Rent</th>
-                            <th style="min-width: 110px;">Maintenance</th>
-                            <th style="min-width: 145px;">Electricity</th>
-                            <th style="min-width: 165px;">Last Month Bal.</th>
-                            <th style="min-width: 100px;">Total</th>
-                            <th style="min-width: 130px;">Collected</th>
-                            <th style="min-width: 155px;">Pending</th>
-                            <th style="min-width: 155px;">Action</th>
+                            <th class="ps-2">Room</th>
+                            <th>Tenant</th>
+                            <th>Rent</th>
+                            <th>Maint.</th>
+                            <th>Electricity</th>
+                            <th>Last Bal.</th>
+                            <th>Total</th>
+                            <th>Received</th>
+                            <th>Pending</th>
+                            <th class="pe-2">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for info in b_entry.rooms_info %}
                         <tr>
                             <!-- 1. Room -->
-                            <td><strong>{{ info.room.room_number }}</strong></td>
+                            <td class="ps-2 fw-bold">{{ info.room.room_number }}</td>
 
                             <!-- 2. Tenant -->
-                            <td class="text-wrap" style="min-width: 150px; max-width: 200px;">
-                                <div class="fw-bold text-dark">{{ info.tenant_name|default:"Vacant" }}</div>
+                            <td style="max-width: 145px;">
+                                <div class="fw-bold text-dark text-truncate" title="{{ info.tenant_name|default:'Vacant' }}">
+                                    {{ info.tenant_name|default:"Vacant" }}
+                                </div>
                                 {% if info.is_multi_room %}
-                                    <span class="badge bg-warning text-dark mt-1" style="font-size: 0.68rem;">Multi-Room Owner</span>
+                                    <span class="badge bg-warning text-dark" style="font-size: 0.62rem;">Multi-Room</span>
                                 {% endif %}
                             </td>
 
@@ -57,11 +59,11 @@
                             <!-- 4. Maintenance -->
                             <td>₹{{ info.maintenance }}</td>
 
-                            <!-- 5. Electricity with Edit & Nil Form -->
+                            <!-- 5. Electricity with Edit & Nil -->
                             <td>
-                                <div class="d-flex align-items-center gap-1">
+                                <div class="d-flex align-items-center gap-1 flex-wrap">
                                     <span>₹{{ info.electricity|default:"0.00" }}</span>
-                                    <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-1" title="Edit Electricity" data-bs-toggle="modal" data-bs-target="#ebModal-{{ info.rent_record.id }}">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-1" style="font-size: 0.7rem;" title="Edit Electricity" data-bs-toggle="modal" data-bs-target="#ebModal-{{ info.rent_record.id }}">
                                         ✏️
                                     </button>
                                     {% if info.electricity and info.electricity > 0 %}
@@ -69,7 +71,7 @@
                                         {% csrf_token %}
                                         <input type="hidden" name="nil_electricity" value="1">
                                         <input type="hidden" name="rent_record_id" value="{{ info.rent_record.id }}">
-                                        <button type="submit" class="btn btn-outline-secondary btn-sm py-0 px-1" style="font-size: 0.72rem;">
+                                        <button type="submit" class="btn btn-outline-secondary btn-sm py-0 px-1" style="font-size: 0.68rem;">
                                             Nil
                                         </button>
                                     </form>
@@ -77,11 +79,11 @@
                                 </div>
                             </td>
 
-                            <!-- 6. Last Month Balance with Edit & Nil Form -->
+                            <!-- 6. Last Month Balance with Edit & Nil -->
                             <td>
-                                <div class="d-flex align-items-center gap-1">
+                                <div class="d-flex align-items-center gap-1 flex-wrap">
                                     <span>₹{{ info.last_month_balance|default:"0.00" }}</span>
-                                    <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-1" title="Edit Last Month Balance" data-bs-toggle="modal" data-bs-target="#lmbModal-{{ info.rent_record.id }}">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-1" style="font-size: 0.7rem;" title="Edit Last Month Balance" data-bs-toggle="modal" data-bs-target="#lmbModal-{{ info.rent_record.id }}">
                                         ✏️
                                     </button>
                                     {% if info.last_month_balance and info.last_month_balance > 0 %}
@@ -89,7 +91,7 @@
                                         {% csrf_token %}
                                         <input type="hidden" name="nil_last_month_balance" value="1">
                                         <input type="hidden" name="rent_record_id" value="{{ info.rent_record.id }}">
-                                        <button type="submit" class="btn btn-outline-secondary btn-sm py-0 px-1" style="font-size: 0.72rem;">
+                                        <button type="submit" class="btn btn-outline-secondary btn-sm py-0 px-1" style="font-size: 0.68rem;">
                                             Nil
                                         </button>
                                     </form>
@@ -100,29 +102,29 @@
                             <!-- 7. Total -->
                             <td class="fw-bold">₹{{ info.total }}</td>
 
-                            <!-- 8. Collected -->
+                            <!-- 8. Received -->
                             <td>
                                 <div class="d-flex align-items-center gap-1">
                                     <span class="fw-bold text-success">₹{{ info.collected }}</span>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1" data-bs-toggle="modal" data-bs-target="#payModal-{{ info.rent_record.id }}">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1" style="font-size: 0.7rem;" data-bs-toggle="modal" data-bs-target="#payModal-{{ info.rent_record.id }}">
                                         ✏️
                                     </button>
                                 </div>
                                 {% if info.payment_method == 'SPLIT' %}
-                                    <div style="font-size: 0.65rem;" class="mt-1">
-                                        <span class="badge bg-primary">UPI: ₹{{ info.upi_amount }}</span>
-                                        <span class="badge bg-secondary">Cash: ₹{{ info.cash_amount }}</span>
+                                    <div style="font-size: 0.6rem;" class="mt-1">
+                                        <span class="badge bg-primary px-1">UPI: ₹{{ info.upi_amount }}</span>
+                                        <span class="badge bg-secondary px-1">Cash: ₹{{ info.cash_amount }}</span>
                                     </div>
                                 {% elif info.payment_method %}
-                                    <span class="badge bg-secondary mt-1" style="font-size: 0.66rem;">{{ info.payment_method }}</span>
+                                    <span class="badge bg-secondary" style="font-size: 0.62rem;">{{ info.payment_method }}</span>
                                 {% endif %}
                             </td>
 
                             <!-- 9. Pending with Edit Modal and Push Form -->
                             <td>
-                                <div class="d-flex align-items-center gap-1">
+                                <div class="d-flex align-items-center gap-1 flex-wrap">
                                     <span class="fw-bold text-danger">₹{{ info.pending }}</span>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1" title="Edit Pending Amount" data-bs-toggle="modal" data-bs-target="#pendingModal-{{ info.rent_record.id }}">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1" style="font-size: 0.7rem;" title="Edit Pending Amount" data-bs-toggle="modal" data-bs-target="#pendingModal-{{ info.rent_record.id }}">
                                         ✏️
                                     </button>
                                     {% if info.pending and info.pending > 0 %}
@@ -130,7 +132,7 @@
                                         {% csrf_token %}
                                         <input type="hidden" name="push_pending_to_lmb" value="1">
                                         <input type="hidden" name="rent_record_id" value="{{ info.rent_record.id }}">
-                                        <button type="submit" class="btn btn-sm btn-warning py-0 px-1 text-dark fw-semibold" style="font-size: 0.72rem;" title="Shift Pending to Last Month Balance">
+                                        <button type="submit" class="btn btn-sm btn-warning py-0 px-1 text-dark fw-semibold" style="font-size: 0.68rem;" title="Shift Pending to Last Month Balance">
                                             Push ⏩
                                         </button>
                                     </form>
@@ -139,23 +141,23 @@
                             </td>
 
                             <!-- 10. Actions (WhatsApp & Preview Receipt with Pending Balance) -->
-                            <td>
+                            <td class="pe-2">
                                 <div class="d-flex flex-column gap-1">
                                     <div class="d-flex align-items-center gap-1">
                                         {% if info.tenant_phone %}
-                                        <a href="https://api.whatsapp.com/send?phone=91{{ info.tenant_phone }}&text=Room%20Number:%20{{ info.room.room_number }}%0ADate:%20{{ info.bill_date }}%0ATenant%20Name:%20{{ info.tenant_name }}%0ARoom%20Rent:₹{{ info.rent }}%0AMaintenance:₹{{ info.maintenance }}%0AElectricity%20Charges:₹{{ info.electricity|default:'0.00' }}%0ALast%20Month%20Balance:₹{{ info.last_month_balance|default:'0.00' }}%0ATotal%20Bill:₹{{ info.total }}%0APending%20Balance:₹{{ info.pending|default:'0.00' }}%0ATotal%20Received:₹{{ info.collected }}%0AReceived%20via%20UPI:₹{{ info.upi_amount|default:'0.00' }}%0AReceived%20via%20Cash:₹{{ info.cash_amount|default:'0.00' }}%0ACollection%20Date:%20{{ info.collection_date_str }}" 
+                                        <a href="https://api.whatsapp.com/send?phone=91{{ info.tenant_phone }}&text=Room%20Number:%20{{ info.room.room_number }}%0ADate:%20{{ info.bill_date }}%0ATenant%20Name:%20{{ info.tenant_name }}%0ARoom%20Rent:₹{{ info.rent }}%0AMaintenance:₹{{ info.maintenance }}%0AElectricity%20Charges:₹{{ info.electricity|default:'0.00' }}%0ALast%20Month%20Balance:₹{{ info.last_month_balance|default:'0.00' }}%0ATotal%20Bill:₹{{ info.total }}%0ATotal%20Received:₹{{ info.collected }}%0APending%20Balance:₹{{ info.pending|default:'0.00' }}%0AReceived%20via%20UPI:₹{{ info.upi_amount|default:'0.00' }}%0AReceived%20via%20Cash:₹{{ info.cash_amount|default:'0.00' }}%0ACollection%20Date:%20{{ info.collection_date_str }}" 
                                            target="_blank" 
-                                           class="btn btn-sm btn-success d-flex align-items-center gap-1 py-1 px-2" style="font-size: 0.78rem;">
+                                           class="btn btn-sm btn-success py-0 px-2 text-nowrap" style="font-size: 0.74rem;">
                                             📲 WhatsApp
                                         </a>
                                         {% endif %}
-                                        <button type="button" class="btn btn-sm btn-outline-dark py-1 px-2" onclick="previewBill('{{ info.room.room_number }}', '{{ info.bill_date }}', '{{ info.tenant_name }}', '{{ info.rent }}', '{{ info.maintenance }}', '{{ info.electricity }}', '{{ info.last_month_balance }}', '{{ info.total }}', '{{ info.pending }}', '{{ info.collected }}', '{{ info.upi_amount }}', '{{ info.cash_amount }}', '{{ info.collection_date_str }}')">
+                                        <button type="button" class="btn btn-sm btn-outline-dark py-0 px-1" style="font-size: 0.74rem;" onclick="previewBill('{{ info.room.room_number }}', '{{ info.bill_date }}', '{{ info.tenant_name }}', '{{ info.rent }}', '{{ info.maintenance }}', '{{ info.electricity }}', '{{ info.last_month_balance }}', '{{ info.total }}', '{{ info.collected }}', '{{ info.pending }}', '{{ info.upi_amount }}', '{{ info.cash_amount }}', '{{ info.collection_date_str }}')">
                                             👁️
                                         </button>
                                     </div>
                                     {% if info.is_multi_room and info.tenant %}
-                                    <a href="{% url 'combined_bill' info.tenant.id %}" class="btn btn-sm btn-primary py-0 px-2 mt-1" style="font-size: 0.72rem;">
-                                        ⭐ Combined Bill 📄
+                                    <a href="{% url 'combined_bill' info.tenant.id %}" class="btn btn-sm btn-primary py-0 px-1 text-nowrap" style="font-size: 0.68rem;">
+                                        ⭐ Combined Bill
                                     </a>
                                     {% endif %}
                                 </div>
@@ -312,7 +314,7 @@
 </div>
 
 <script>
-function previewBill(room, billDate, tenant, rent, maint, eb, lmb, total, pending, collected, upi, cash, collDate) {
+function previewBill(room, billDate, tenant, rent, maint, eb, lmb, total, collected, pending, upi, cash, collDate) {
     const content = `
         <div><strong>Room Number:</strong> ${room}</div>
         <div><strong>Date:</strong> ${billDate}</div>
@@ -323,8 +325,8 @@ function previewBill(room, billDate, tenant, rent, maint, eb, lmb, total, pendin
         <div><strong>Last Month Balance:</strong> ₹${lmb || '0.00'}</div>
         <hr class="my-2">
         <div class="fs-5 fw-bold"><strong>Total Bill:</strong> ₹${total}</div>
-        <div class="text-danger fw-bold"><strong>Pending Balance:</strong> ₹${pending || '0.00'}</div>
         <div class="text-success"><strong>Total Received:</strong> ₹${collected}</div>
+        <div class="text-danger fw-bold"><strong>Pending Balance:</strong> ₹${pending || '0.00'}</div>
         <div class="text-primary ps-3"><strong>Received via UPI:</strong> ₹${upi || '0.00'}</div>
         <div class="text-secondary ps-3"><strong>Received via Cash:</strong> ₹${cash || '0.00'}</div>
         <div class="text-muted ps-3"><strong>Collection Date:</strong> ${collDate || '-'}</div>
