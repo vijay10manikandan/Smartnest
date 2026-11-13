@@ -1,9 +1,14 @@
 {% extends 'Smartnestapp/base.html' %}
 {% block content %}
 <div class="container-fluid py-3 px-2 px-md-3">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="fw-bold mb-0 fs-4 fs-md-3">Monthly Expense Tracker</h2>
-        <span class="badge bg-dark fs-6">Total Active: ₹{{ total_expense|default:"0.00" }}</span>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <h2 class="fw-bold mb-0 fs-4 fs-md-3">Monthly Expenses ({{ month_label }})</h2>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-dark fs-6 py-2 px-3">Dashboard Expense Total: ₹{{ grand_dashboard_expense|default:"0.00" }}</span>
+            <button type="button" class="btn btn-success btn-sm fw-semibold px-3 py-2" data-bs-toggle="modal" data-bs-target="#addExpenseModal">
+                ➕ Add Expense
+            </button>
+        </div>
     </div>
 
     {% if messages %}
@@ -17,11 +22,18 @@
 
     <form method="POST">
         {% csrf_token %}
-        <div class="card shadow-sm border-0 mb-3">
+        <input type="hidden" name="save_all_expenses" value="1">
+
+        <!-- Section 1: 11 Fixed Monthly Expenses -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-2 px-3">
+                <h5 class="mb-0 fs-6 fw-semibold">Fixed Monthly Expenses</h5>
+                <span class="badge bg-secondary">Subtotal: ₹{{ fixed_total|default:"0.00" }}</span>
+            </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
-                        <thead class="table-dark">
+                        <thead class="table-light">
                             <tr>
                                 <th class="ps-3" style="width: 80px;">Active</th>
                                 <th>Expense Description</th>
@@ -29,39 +41,98 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for exp in expenses %}
+                            {% for item in fixed_items %}
                             <tr>
                                 <td class="ps-3">
                                     <input class="form-check-input expense-checkbox"
                                            type="checkbox"
-                                           name="active_{{ exp.id }}"
-                                           id="chk_{{ exp.id }}"
-                                           data-target="amt_{{ exp.id }}"
+                                           name="{{ item.active_field }}"
+                                           id="chk_{{ item.active_field }}"
+                                           data-target="amt_{{ item.amt_field }}"
                                            style="width: 1.2rem; height: 1.2rem; cursor: pointer;"
-                                           {% if exp.checked_state %}checked{% endif %}>
+                                           {% if item.is_active %}checked{% endif %}>
                                 </td>
-
                                 <td class="fw-semibold text-dark">
-                                    <label for="chk_{{ exp.id }}" style="cursor: pointer;" class="mb-0 w-100">
-                                        {{ exp.label_text }}
+                                    <label for="chk_{{ item.active_field }}" style="cursor: pointer;" class="mb-0 w-100">
+                                        {{ item.label }}
                                     </label>
                                 </td>
-
                                 <td class="pe-3">
                                     <input type="number"
                                            step="0.01"
-                                           name="amount_{{ exp.id }}"
-                                           id="amt_{{ exp.id }}"
+                                           name="{{ item.amt_field }}"
+                                           id="amt_{{ item.amt_field }}"
                                            class="form-control form-control-sm expense-amount"
-                                           data-checkbox="chk_{{ exp.id }}"
-                                           value="{% if exp.checked_state and exp.amount %}{{ exp.amount }}{% endif %}"
+                                           data-checkbox="chk_{{ item.active_field }}"
+                                           value="{% if item.is_active %}{{ item.amount }}{% endif %}"
                                            placeholder="0.00"
-                                           {% if not exp.checked_state %}readonly style="background-color: #f8f9fa;"{% endif %}>
+                                           {% if not item.is_active %}readonly style="background-color: #f8f9fa;"{% endif %}>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Additional / Chit Expenses (Column-Wise with Separate Dashboard Checkbox) -->
+        <div class="card shadow-sm border-0 mb-3">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-2 px-3">
+                <h5 class="mb-0 fs-6 fw-semibold">Additional / Chit Expenses</h5>
+                <span class="badge bg-info text-dark">Selected for Dashboard: ₹{{ custom_dashboard_total|default:"0.00" }}</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3" style="width: 115px;">Dashboard</th>
+                                <th>Expense Name</th>
+                                <th>Chit No / Installment</th>
+                                <th>Amount (₹)</th>
+                                <th>Date of Payment</th>
+                                <th class="pe-3" style="width: 80px;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for c_exp in custom_expenses %}
+                            <tr>
+                                <td class="ps-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input"
+                                               type="checkbox"
+                                               name="dash_custom_{{ c_exp.id }}"
+                                               id="dash_chk_{{ c_exp.id }}"
+                                               style="width: 1.2rem; height: 1.2rem; cursor: pointer;"
+                                               {% if c_exp.include_in_dashboard %}checked{% endif %}>
+                                        <label class="form-check-label small text-muted" for="dash_chk_{{ c_exp.id }}">Include</label>
+                                    </div>
+                                </td>
+                                <td class="fw-bold text-dark">{{ c_exp.expense_name }}</td>
+                                <td>
+                                    {% if c_exp.chit_no %}
+                                        <span class="badge bg-secondary">{{ c_exp.chit_no }}</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="fw-bold text-danger">₹{{ c_exp.amount|default:"0.00" }}</td>
+                                <td>{{ c_exp.payment_date|date:"d/m/Y"|default:"-" }}</td>
+                                <td class="pe-3">
+                                    <button type="submit"
+                                            form="delForm_{{ c_exp.id }}"
+                                            class="btn btn-outline-danger btn-sm py-0 px-2"
+                                            onclick="return confirm('Delete this expense entry?');">
+                                        🗑️
+                                    </button>
                                 </td>
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="3" class="text-center text-muted py-3">No expense items configured.</td>
+                                <td colspan="6" class="text-center text-muted py-3">
+                                    No additional expenses added yet. Click <strong>➕ Add Expense</strong> above to add one.
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -72,10 +143,66 @@
 
         <div class="d-flex justify-content-end">
             <button type="submit" class="btn btn-primary px-4 fw-semibold">
-                💾 Save Expenses
+                💾 Save Expenses & Dashboard Selection
             </button>
         </div>
     </form>
+
+    <!-- Hidden Delete Forms for Custom Rows -->
+    {% for c_exp in custom_expenses %}
+    <form method="POST" id="delForm_{{ c_exp.id }}" class="d-none">
+        {% csrf_token %}
+        <input type="hidden" name="delete_custom_expense" value="1">
+        <input type="hidden" name="expense_id" value="{{ c_exp.id }}">
+    </form>
+    {% endfor %}
+</div>
+
+<!-- Add Expense Modal -->
+<div class="modal fade" id="addExpenseModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form method="POST" class="modal-content">
+            {% csrf_token %}
+            <input type="hidden" name="add_custom_expense" value="1">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title">➕ Add Expense Entry</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Expense Name <span class="text-danger">*</span></label>
+                    <input type="text" name="expense_name" class="form-control" placeholder="e.g., Kiruba Chit, Plumbing" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Chit No / Installment</label>
+                    <input type="text" name="chit_no" class="form-control" placeholder="e.g., Chit #3 - Installment 4/20">
+                </div>
+
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label class="form-label fw-bold">Amount (₹) <span class="text-danger">*</span></label>
+                        <input type="number" step="0.01" name="amount" class="form-control" placeholder="0.00" required>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label fw-bold">Date of Payment</label>
+                        <input type="date" name="payment_date" class="form-control" value="{{ today|date:'Y-m-d' }}" required>
+                    </div>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="include_in_dashboard" id="modalDashCheck" checked>
+                    <label class="form-check-label fw-semibold" for="modalDashCheck">
+                        Include this expense in Dashboard Total
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-success btn-sm px-3">Add Expense</button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <script>

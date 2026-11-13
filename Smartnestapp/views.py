@@ -17,6 +17,7 @@ from .models import (
     ElectricityReading,
     RentDetail,
     MonthlyExpense,
+    CustomExpense,  
 )
 from .forms import (
     TenantForm,
@@ -159,6 +160,15 @@ def dashboard_view(request):
     # 8. Net Profit Calculation (Total Collected - Total Expenses)
     net_profit = total_collected - total_expenses
     is_profit = net_profit >= Decimal('0.00')
+
+    month_label = date.today().strftime("%b %Y")
+    monthly_exp = MonthlyExpense.objects.filter(month=month_label).first()
+    fixed_exp_total = Decimal(str(monthly_exp.total_expense())) if monthly_exp else Decimal('0.00')
+    custom_exp_total = sum(
+        (c.amount or Decimal('0.00'))
+        for c in CustomExpense.objects.filter(month=month_label, include_in_dashboard=True)
+    )
+    total_expenses = fixed_exp_total + custom_exp_total
 
     context = {
         'total_rooms': total_rooms,
@@ -1157,51 +1167,114 @@ def pwa_sw(request):
     )
     return HttpResponse(js_content, content_type="application/javascript")
 
+FIXED_EXPENSE_FIELDS = [
+    ('grt_payment_active', 'grt_payment', 'GRT Payment'),
+    ('tneb_active', 'tneb_payment', 'TNEB Payment'),
+    ('mani_chit_1_active', 'mani_chit_1', 'Mani Chit (1)'),
+    ('mani_chit_2_active', 'mani_chit_2', 'Mani Chit (2)'),
+    ('indira_chit_active', 'indira_chit', 'Indira Chit'),
+    ('dhamayanthi_milk_chit_active', 'dhamayanthi_milk_chit', 'Dhamayanthi Milk Chit'),
+    ('gas_cylinder_active', 'gas_cylinder', 'Gas Cylinder'),
+    ('groceries_active', 'groceries', 'Groceries'),
+    ('hardwares_active', 'hardwares', 'Hardwares'),
+    ('broadband_3_active', 'broadband_recharge_3', 'Broadband Recharge (3)'),
+    ('other_expenses_active', 'other_expenses', 'Other Expenses'),
+]
+
 @login_required
 def expense_details_view(request):
     close_old_connections()
     today = date.today()
-    current_month = today.replace(day=1)
+    month_label = today.strftime("%b %Y")  # e.g., "Nov 2026"
+
+    monthly_exp, _ = MonthlyExpense.objects.get_or_create(month=month_label)
 
     if request.method == 'POST':
-        all_expenses = MonthlyExpense.objects.all()
-        for exp in all_expenses:
-            is_checked = f"active_{exp.id}" in request.POST
-            raw_amt = request.POST.get(f"amount_{exp.id}", "").strip()
+        # 1. Add New Custom Expense (Modal Form)
+        if 'add_custom_expense' in request.POST:
+            exp_name = request.POST.get('expense_name', '').strip()
+            chit_no = request.POST.get('chit_no', '').strip()
+            raw_amt = request.POST.get('amount', '0.00').strip()
+            pay_date_str = request.POST.get('payment_date', '').strip()
+            include_dash = 'include_in_dashboard' in request.POST
 
-            if hasattr(exp, 'is_active'):
-                exp.is_active = is_checked
-            elif hasattr(exp, 'active'):
-                exp.active = is_checked
+            try:
+                amt = Decimal(raw_amt) if raw_amt else Decimal('0.00')
+            except Exception:
+                amt = Decimal('0.00')
 
-            if is_checked and raw_amt:
-                try:
-                    exp.amount = Decimal(raw_amt)
-                except Exception:
-                    exp.amount = Decimal('0.00')
-            elif not is_checked:
-                exp.amount = Decimal('0.00')
-            exp.save()
+            try:
+                pay_date = date.fromisoformat(pay_date_str) if pay_date_str else today
+            except ValueError:
+                pay_date = today
 
-        messages.success(request, "Expenses updated successfully.")
-        return redirect(request.path)
+            if exp_name:
+                CustomExpense.objects.create(
+                    month=month_label,
+                    expense_name=exp_name,
+                    chit_no=chit_no,
+                    amount=amt,
+                    payment_date=pay_date,
+                    include_in_dashboard=include_dash,
+                )
+                messages.success(request, f"Added expense: {exp_name} (₹{amt}).")
+            return redirect(request.path)
 
-    expenses = MonthlyExpense.objects.all().order_by('id')
-    for exp in expenses:
-        exp.checked_state = getattr(exp, 'is_active', getattr(exp, 'active', False))
-        exp.label_text = (
-            getattr(exp, 'description', None)
-            or getattr(exp, 'expense_description', None)
-            or getattr(exp, 'name', None)
-            or str(exp)
-        )
+        # 2. Save All 11 Fixed Expenses + Custom Dashboard Checkboxes
+        if 'save_all_expenses' in request.POST:
+            for active_field, amt_field, _ in FIXED_EXPENSE_FIELDS:
+                is_checked = active_field in request.POST
+                raw_amt = request.POST.get(amt_field, '').strip()
 
-    total_expense = sum((e.amount or Decimal('0.00')) for e in expenses if e.checked_state)
+                setattr(monthly_exp, active_field, is_checked)
+                if is_checked and raw_amt:
+                    try:
+                        setattr(monthly_exp, amt_field, Decimal(raw_amt))
+                    except Exception:
+                        setattr(monthly_exp, amt_field, Decimal('0.00'))
+                elif not is_checked:
+                    setattr(monthly_exp, amt_field, Decimal('0.00'))
+            monthly_exp.save()
+
+            for c_exp in CustomExpense.objects.filter(month=month_label):
+                c_exp.include_in_dashboard = f"dash_custom_{c_exp.id}" in request.POST
+                c_exp.save(update_fields=['include_in_dashboard'])
+
+            messages.success(request, f"Saved all expenses for {month_label}.")
+            return redirect(request.path)
+
+        # 3. Delete Custom Expense Row
+        if 'delete_custom_expense' in request.POST:
+            del_id = request.POST.get('expense_id')
+            CustomExpense.objects.filter(id=del_id).delete()
+            messages.success(request, "Custom expense deleted.")
+            return redirect(request.path)
+
+    # Build structured list of the 11 fixed items for the template
+    fixed_items = []
+    for active_field, amt_field, label in FIXED_EXPENSE_FIELDS:
+        fixed_items.append({
+            'active_field': active_field,
+            'amt_field': amt_field,
+            'label': label,
+            'is_active': getattr(monthly_exp, active_field),
+            'amount': getattr(monthly_exp, amt_field),
+        })
+
+    custom_expenses = CustomExpense.objects.filter(month=month_label).order_by('-payment_date', '-id')
+    fixed_total = Decimal(str(monthly_exp.total_expense()))
+    custom_dashboard_total = sum((c.amount or Decimal('0.00')) for c in custom_expenses if c.include_in_dashboard)
+    grand_dashboard_expense = fixed_total + custom_dashboard_total
 
     return render(request, 'Smartnestapp/expenses.html', {
-        'expenses': expenses,
-        'total_expense': total_expense,
-        'billing_month': current_month,
+        'monthly_exp': monthly_exp,
+        'fixed_items': fixed_items,
+        'custom_expenses': custom_expenses,
+        'fixed_total': fixed_total,
+        'custom_dashboard_total': custom_dashboard_total,
+        'grand_dashboard_expense': grand_dashboard_expense,
+        'month_label': month_label,
+        'today': today,
     })
 @login_required
 def combined_bill_view(request, tenant_id):

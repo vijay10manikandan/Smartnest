@@ -249,3 +249,14 @@ class MonthlyExpense(models.Model):
 
     def __str__(self):
         return f"Expenses ({self.month})"
+class CustomExpense(models.Model):
+    month = models.CharField(max_length=20, default="Nov 2026")  # e.g., 'Nov 2026'
+    expense_name = models.CharField(max_length=255)
+    chit_no = models.CharField(max_length=100, blank=True, null=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    payment_date = models.DateField(default=date.today)
+    include_in_dashboard = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.expense_name} - ₹{self.amount}"
